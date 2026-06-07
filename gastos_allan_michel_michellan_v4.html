@@ -9,7 +9,29 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="Gastos">
   <meta name="theme-color" content="#80cee1">
+  <link rel="icon" id="fav" type="image/png">
+  <link rel="apple-touch-icon" id="apl">
   <title>Controle de Gastos</title>
+  <script>
+    function makeIcon(size) {
+      const c = document.createElement('canvas');
+      c.width = c.height = size;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#80cee1';
+      ctx.beginPath();
+      ctx.roundRect(0, 0, size, size, size * 0.22);
+      ctx.fill();
+      ctx.font = (size * 0.6) + 'px serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('\uD83D\uDCB0', size / 2, size / 2 + size * 0.04);
+      return c.toDataURL('image/png');
+    }
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('fav').href = makeIcon(32);
+      document.getElementById('apl').href = makeIcon(192);
+    });
+  </script>
 
   <!-- ⚠️ SUBSTITUA pela URL do seu Web App após publicar o Apps Script -->
   <script>
@@ -392,7 +414,8 @@
 
   // ── Estado ──────────────────────────────────────────────
   let quem = 'allan';
-  const lancamentos = [];
+  const STORAGE_KEY = 'gastos_historico';
+  const lancamentos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
   let centavos = 0;
 
   // ── Navegação ───────────────────────────────────────────
@@ -477,8 +500,8 @@
       body: JSON.stringify(payload)
     })
     .then(() => {
-      // no-cors não retorna body, mas se chegou aqui é porque enviou
       lancamentos.unshift({ mes, ano, desc, valor, quem });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(lancamentos));
       renderHist();
       descEl.value = '';
       resetValor();
@@ -532,6 +555,9 @@
     t.classList.add('show');
     setTimeout(() => t.classList.remove('show'), 2500);
   }
+
+  // ── Inicializar histórico salvo ───────────────────────────
+  if (lancamentos.length) renderHist();
 </script>
 </body>
 </html>
