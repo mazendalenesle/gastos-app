@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Gastos">
+  <meta name="theme-color" content="#80cee1">
+  <title>Controle de Gastos</title>
+
+  <!-- ⚠️ SUBSTITUA pela URL do seu Web App após publicar o Apps Script -->
+  <script>
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3R0NP8T4gkX_i35ykKaw8bySbCfQOAt-c5fVuzaLg6HgvRO3yWdatvbSOdELQjR9G/exec';
+  </script>
+
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --brand: #80cee1;
+      --brand-dark: #3a9ab5;
+      --red-light: #FDECEA; --red-deep: #C0392B; --red-sel: #f5b8b5;
+      --blue-light: #E8F0FE; --blue-deep: #2563A8; --blue-sel: #b5cef7;
+      --pink-light: #FDE8F0; --pink-deep: #A0305A; --pink-sel: #f5b0cc;
+      --green-btn: #b7e7c2; --green-btn-text: #1a5c30;
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --border: #e0e4ea;
+      --text: #1a1a2e;
+      --text-muted: #6b7280;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+    }
+
+    body {
+      background: var(--bg);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 1rem;
+    }
+
+    .screen {
+      background: var(--surface);
+      border-radius: var(--radius-lg);
+      border: 0.5px solid var(--border);
+      width: 100%;
+      max-width: 400px;
+      overflow: hidden;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+    }
+
+    .topbar {
+      background: var(--brand);
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .topbar svg { flex-shrink: 0; }
+    .topbar h1 { color: #1a4f5e; font-size: 16px; font-weight: 600; }
+
+    .tabs { display: flex; border-bottom: 1px solid var(--border); }
+    .tab {
+      flex: 1; padding: 11px 4px; font-size: 13px; font-weight: 500;
+      border: none; background: none; cursor: pointer; color: var(--text-muted);
+      border-bottom: 2px solid transparent; font-family: inherit;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .tab.active { color: var(--brand-dark); border-bottom-color: var(--brand-dark); }
+
+    .panel { display: none; }
+    .panel.visible { display: block; }
+    .form-area { padding: 1rem 1.25rem; }
+
+    .who-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
+    .who-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+    .who-btn {
+      padding: 10px 4px 8px; font-size: 13px; font-weight: 500;
+      border-radius: var(--radius-md); border: 2px solid transparent;
+      cursor: pointer; font-family: inherit; transition: all 0.18s;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      position: relative;
+    }
+    .who-btn .emoji { font-size: 22px; }
+    .who-btn .check {
+      position: absolute; top: 5px; right: 6px; font-size: 11px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .who-btn.allan { background: var(--red-light); color: var(--red-deep); }
+    .who-btn.allan.sel { border-color: var(--red-deep); background: var(--red-sel); box-shadow: inset 0 0 0 1px var(--red-deep); }
+    .who-btn.allan.sel .check { opacity: 1; }
+    .who-btn.michel { background: var(--blue-light); color: var(--blue-deep); }
+    .who-btn.michel.sel { border-color: var(--blue-deep); background: var(--blue-sel); box-shadow: inset 0 0 0 1px var(--blue-deep); }
+    .who-btn.michel.sel .check { opacity: 1; }
+    .who-btn.michellan { background: var(--pink-light); color: var(--pink-deep); }
+    .who-btn.michellan.sel { border-color: var(--pink-deep); background: var(--pink-sel); box-shadow: inset 0 0 0 1px var(--pink-deep); }
+    .who-btn.michellan.sel .check { opacity: 1; }
+
+    .form-row { margin-bottom: 12px; }
+    .form-row label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 500; }
+    .form-row select, .form-row input {
+      width: 100%; padding: 9px 10px; font-size: 14px;
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--surface); color: var(--text); font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .form-row input[type=number]::-webkit-inner-spin-button,
+    .form-row input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .form-row select:focus, .form-row input:focus { outline: none; border-color: var(--brand-dark); }
+    .split { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+    .btn-reg {
+      width: 100%; padding: 11px; margin-top: 4px;
+      border: none; border-radius: var(--radius-md);
+      font-size: 14px; font-weight: 600; font-family: inherit;
+      cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--green-btn); color: var(--green-btn-text);
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .btn-reg:hover { opacity: 0.88; }
+    .btn-reg:active { transform: scale(0.98); }
+    .btn-reg.sending { opacity: 0.55; pointer-events: none; }
+    .btn-reg.erro-envio { background: #FDECEA; color: var(--red-deep); }
+
+    /* Histórico */
+    .hist-area { padding: 0.75rem 0 0; }
+    .hist-header {
+      display: grid; grid-template-columns: 1.4fr 1.8fr 1.2fr 1.1fr; gap: 4px;
+      padding: 6px 1.25rem; background: #f8f9fa;
+      border-bottom: 1px solid var(--border);
+      font-size: 11px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.04em;
+    }
+    .hist-header span:nth-child(3) { text-align: right; }
+    .hist-header span:nth-child(4) { text-align: center; }
+    .hist-body { padding: 0 0 0.5rem; max-height: 55vh; overflow-y: auto; }
+    .entry-row {
+      display: grid; grid-template-columns: 1.4fr 1.8fr 1.2fr 1.1fr; gap: 4px;
+      padding: 9px 1.25rem; border-bottom: 1px solid var(--border);
+      font-size: 13px; align-items: center;
+      animation: pop 0.2s ease;
+    }
+    .entry-row:last-child { border-bottom: none; }
+    .entry-row .lbl-mes { color: var(--text-muted); font-size: 11px; }
+    .entry-row .val { font-weight: 600; text-align: right; color: var(--text); }
+    .badge {
+      display: inline-block; padding: 2px 7px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; text-align: center;
+    }
+    .badge.allan { background: var(--red-light); color: var(--red-deep); }
+    .badge.michel { background: var(--blue-light); color: var(--blue-deep); }
+    .badge.michellan { background: var(--pink-light); color: var(--pink-deep); }
+    .empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 2.5rem 1rem; }
+    .total-bar {
+      display: flex; justify-content: space-between;
+      padding: 10px 1.25rem; border-top: 1px solid var(--border);
+      font-size: 13px; font-weight: 600; background: #f8f9fa;
+    }
+    .total-bar span:last-child { color: var(--green-btn-text); }
+
+    /* Toast */
+    .toast {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      padding: 10px 20px; border-radius: 24px;
+      font-size: 13px; font-weight: 500;
+      opacity: 0; transition: opacity 0.25s; pointer-events: none;
+      white-space: nowrap; z-index: 99;
+    }
+    .toast.ok { background: #1a5c30; color: #fff; }
+    .toast.err { background: var(--red-deep); color: #fff; }
+    .toast.show { opacity: 1; }
+
+    @keyframes pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+    .err-field { border-color: var(--red-deep) !important; }
+  </style>
+</head>
+<body>
+<div class="screen">
+  <div class="topbar">
+    <!-- Ícone de carteira inline SVG -->
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a4f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+      <path d="M16 3H8L6 7h12l-2-4z"/>
+      <circle cx="17" cy="13" r="1" fill="#1a4f5e"/>
+    </svg>
+    <h1>Controle de Gastos</h1>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showPanel('reg', this)">＋ Registrar</button>
+    <button class="tab" onclick="showPanel('hist', this)">☰ Lançamentos</button>
+  </div>
+
+  <!-- PAINEL REGISTRAR -->
+  <div class="panel visible" id="panel-reg">
+    <div class="form-area">
+      <div class="who-label">Gasto de quem?</div>
+      <div class="who-btns">
+        <button class="who-btn allan sel" onclick="selectWho('allan', this)">
+          <span class="check">✓</span>
+          <span class="emoji">👨🏻‍🦱</span>Allan
+        </button>
+        <button class="who-btn michel" onclick="selectWho('michel', this)">
+          <span class="check">✓</span>
+          <span class="emoji">👨🏽‍🦱</span>Michel
+        </button>
+        <button class="who-btn michellan" onclick="selectWho('michellan', this)">
+          <span class="check">✓</span>
+          <span class="emoji">🩷</span>Michellan
+        </button>
+      </div>
+
+      <div class="split">
+        <div class="form-row">
+          <label>Mês</label>
+          <select id="mes">
+            <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
+            <option>Abril</option><option>Maio</option><option selected>Junho</option>
+            <option>Julho</option><option>Agosto</option><option>Setembro</option>
+            <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <label>Ano</label>
+          <input type="number" id="ano" value="2026" min="2020" max="2099" style="text-align:center;">
+        </div>
+      </div>
+
+      <div class="form-row">
+        <label>Descrição do gasto</label>
+        <input type="text" id="desc" placeholder="Ex: Mercado, Academia...">
+      </div>
+      <div class="form-row">
+        <label>Valor (R$)</label>
+        <input type="text" id="valor-display" inputmode="numeric" placeholder="R$ 0,00" autocomplete="off">
+      </div>
+
+      <button class="btn-reg" id="btn-reg" onclick="registrar()">
+        ✈ Registrar gasto
+      </button>
+    </div>
+  </div>
+
+  <!-- PAINEL HISTÓRICO -->
+  <div class="panel" id="panel-hist">
+    <div class="hist-area">
+      <div class="hist-header">
+        <span>Período</span>
+        <span>Gasto</span>
+        <span style="text-align:right">Valor</span>
+        <span style="text-align:center">Quem</span>
+      </div>
+      <div class="hist-body" id="hist-body">
+        <div class="empty">Nenhum lançamento ainda</div>
+      </div>
+      <div class="total-bar" id="total-bar" style="display:none">
+        <span>Total registrado</span>
+        <span id="total-val"></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ── Estado ──────────────────────────────────────────────
+  let quem = 'allan';
+  const lancamentos = [];
+  let centavos = 0;
+
+  // ── Navegação ───────────────────────────────────────────
+  function showPanel(id, btn) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
+    document.getElementById('panel-' + id).classList.add('visible');
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+  }
+
+  function selectWho(who, el) {
+    quem = who;
+    document.querySelectorAll('.who-btn').forEach(b => b.classList.remove('sel'));
+    el.classList.add('sel');
+  }
+
+  // ── Campo de valor inteligente (centavos) ───────────────
+  const valorEl = document.getElementById('valor-display');
+
+  function formatCentavos(c) {
+    if (c === 0) return '';
+    const str = String(c).padStart(3, '0');
+    const intPart = str.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const decPart = str.slice(-2);
+    return 'R$ ' + intPart + ',' + decPart;
+  }
+
+  valorEl.addEventListener('keydown', function(e) {
+    if (e.key === 'Backspace') {
+      centavos = Math.floor(centavos / 10);
+      this.value = formatCentavos(centavos);
+      e.preventDefault();
+    }
+  });
+
+  valorEl.addEventListener('input', function(e) {
+    const digit = (e.data || '').replace(/\D/g, '');
+    if (!digit) return;
+    for (const d of digit) {
+      if (centavos > 9999999) continue;
+      centavos = centavos * 10 + parseInt(d);
+    }
+    this.value = formatCentavos(centavos);
+  });
+
+  valorEl.addEventListener('focus', function() {
+    this.classList.remove('err-field');
+  });
+
+  function getValorFloat() { return centavos / 100; }
+
+  function resetValor() {
+    centavos = 0;
+    valorEl.value = '';
+  }
+
+  // ── Registrar ────────────────────────────────────────────
+  function registrar() {
+    const mes   = document.getElementById('mes').value;
+    const ano   = document.getElementById('ano').value || '2026';
+    const desc  = document.getElementById('desc').value.trim();
+    const valor = getValorFloat();
+    const descEl = document.getElementById('desc');
+
+    descEl.classList.remove('err-field');
+    valorEl.classList.remove('err-field');
+    let ok = true;
+    if (!desc)     { descEl.classList.add('err-field');  ok = false; }
+    if (valor <= 0){ valorEl.classList.add('err-field'); ok = false; }
+    if (!ok) return;
+
+    const btn = document.getElementById('btn-reg');
+    btn.classList.add('sending');
+    btn.textContent = '⏳ Enviando...';
+
+    const payload = { mes, ano, desc, valor, pessoa: capitalizarPessoa(quem) };
+
+    fetch(APPS_SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',           // Apps Script exige no-cors
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    })
+    .then(() => {
+      // no-cors não retorna body, mas se chegou aqui é porque enviou
+      lancamentos.unshift({ mes, ano, desc, valor, quem });
+      renderHist();
+      descEl.value = '';
+      resetValor();
+      btn.classList.remove('sending');
+      btn.textContent = '✈ Registrar gasto';
+      toast('✓ Gasto enviado!', 'ok');
+    })
+    .catch(() => {
+      btn.classList.remove('sending');
+      btn.classList.add('erro-envio');
+      btn.textContent = '⚠ Erro ao enviar — tente novamente';
+      setTimeout(() => {
+        btn.classList.remove('erro-envio');
+        btn.textContent = '✈ Registrar gasto';
+      }, 3000);
+      toast('Erro ao conectar com a planilha', 'err');
+    });
+  }
+
+  function capitalizarPessoa(p) {
+    const map = { allan: 'Allan', michel: 'Michel', michellan: 'Michellan' };
+    return map[p] || p;
+  }
+
+  // ── Histórico ─────────────────────────────────────────────
+  function renderHist() {
+    const body = document.getElementById('hist-body');
+    if (!lancamentos.length) {
+      body.innerHTML = '<div class="empty">Nenhum lançamento ainda</div>';
+      document.getElementById('total-bar').style.display = 'none';
+      return;
+    }
+    body.innerHTML = lancamentos.map(l =>
+      `<div class="entry-row">
+        <span class="lbl-mes">${l.mes} ${l.ano}</span>
+        <span>${l.desc}</span>
+        <span class="val">R$ ${l.valor.toFixed(2).replace('.', ',')}</span>
+        <span style="text-align:center"><span class="badge ${l.quem}">${capitalizarPessoa(l.quem)}</span></span>
+      </div>`
+    ).join('');
+    const total = lancamentos.reduce((s, l) => s + l.valor, 0);
+    document.getElementById('total-val').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+    document.getElementById('total-bar').style.display = 'flex';
+  }
+
+  // ── Toast ─────────────────────────────────────────────────
+  function toast(msg, tipo = 'ok') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast ' + tipo;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+</script>
+</body>
+</html>
