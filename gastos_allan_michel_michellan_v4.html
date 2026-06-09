@@ -35,7 +35,7 @@
 
   <!-- ⚠️ SUBSTITUA pela URL do seu Web App após publicar o Apps Script -->
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby3R0NP8T4gkX_i35ykKaw8bySbCfQOAt-c5fVuzaLg6HgvRO3yWdatvbSOdELQjR9G/exec';
+    const APPS_SCRIPT_URL = 'COLE_AQUI_A_URL_DO_WEB_APP';
   </script>
 
   <style>
@@ -491,7 +491,7 @@
     btn.classList.add('sending');
     btn.textContent = '⏳ Enviando...';
 
-    const payload = { mes, ano, desc, valor, pessoa: capitalizarPessoa(quem) };
+    const payload = { mes, ano, desc, valor, pessoa: capitalizarPessoa(quem), dispositivo: detectarDispositivo() };
 
     fetch(APPS_SCRIPT_URL, {
       method: 'POST',
@@ -521,6 +521,22 @@
     });
   }
 
+  // ── Detecção de dispositivo ───────────────────────────────
+  function detectarDispositivo() {
+    const ua = navigator.userAgent || '';
+    const standalone = window.navigator.standalone; // true quando salvo na home do iOS
+    const isAndroidApp = window.matchMedia('(display-mode: standalone)').matches;
+
+    if (/iPhone|iPad|iPod/i.test(ua)) {
+      return standalone ? 'iOS (App)' : 'iOS (Safari)';
+    }
+    if (/Android/i.test(ua)) {
+      return isAndroidApp ? 'Android (App)' : 'Android (Navegador)';
+    }
+    return 'Web Desktop';
+  }
+
+  // ── Capitalizar pessoa ────────────────────────────────────
   function capitalizarPessoa(p) {
     const map = { allan: 'Allan', michel: 'Michel', michellan: 'Michellan' };
     return map[p] || p;
