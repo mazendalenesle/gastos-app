@@ -12,7 +12,11 @@
   <link rel="icon" id="fav" type="image/png">
   <link rel="apple-touch-icon" id="apl">
   <title>Controle de Gastos</title>
+
   <script>
+    // ⚠️ SUBSTITUA pela URL do seu Web App após publicar o Apps Script
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxKDzR49Y4FTEa4JlTKqW54p6YNjljBQhk4LBHpaT5cZlQURaI6KGwnDHodEFMcuGHS/exec';
+
     function makeIcon(size) {
       const c = document.createElement('canvas');
       c.width = c.height = size;
@@ -33,11 +37,6 @@
     });
   </script>
 
-  <!-- ⚠️ SUBSTITUA pela URL do seu Web App após publicar o Apps Script -->
-  <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkos-sHfhKIIZj0cIV6S-Uyl_0wp7kLMfHZZWpXqGCniXwZiQbtcgR-nvIilHXo53B/exec';
-  </script>
-
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
@@ -47,6 +46,7 @@
       --blue-light: #E8F0FE; --blue-deep: #2563A8; --blue-sel: #b5cef7;
       --pink-light: #FDE8F0; --pink-deep: #A0305A; --pink-sel: #f5b0cc;
       --green-btn: #b7e7c2; --green-btn-text: #1a5c30;
+      --yellow-light: #FFF8E1; --yellow-deep: #B45309;
       --bg: #f4f6f8;
       --surface: #ffffff;
       --border: #e0e4ea;
@@ -60,18 +60,16 @@
       background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
-      display: flex;
-      align-items: flex-start;
-      justify-content: center;
+      display: flex; align-items: flex-start; justify-content: center;
       padding: 1rem;
     }
 
+    /* ── Tela base ── */
     .screen {
       background: var(--surface);
       border-radius: var(--radius-lg);
       border: 0.5px solid var(--border);
-      width: 100%;
-      max-width: 400px;
+      width: 100%; max-width: 400px;
       overflow: hidden;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
     }
@@ -79,13 +77,50 @@
     .topbar {
       background: var(--brand);
       padding: 1rem 1.25rem;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      display: flex; align-items: center; gap: 10px;
     }
     .topbar svg { flex-shrink: 0; }
-    .topbar h1 { color: #1a4f5e; font-size: 16px; font-weight: 600; }
+    .topbar h1 { color: #1a4f5e; font-size: 16px; font-weight: 600; flex: 1; }
+    .topbar .back-btn {
+      background: none; border: none; cursor: pointer;
+      color: #1a4f5e; font-size: 22px; padding: 2px 4px;
+      display: none; align-items: center;
+    }
+    .topbar .back-btn.visible { display: flex; }
 
+    /* ── Telas (views) ── */
+    .view { display: none; }
+    .view.visible { display: block; }
+
+    /* ══════════════════════════════════════
+       VIEW: MENU PRINCIPAL
+    ══════════════════════════════════════ */
+    .menu-area { padding: 1.5rem 1.25rem; }
+    .menu-titulo {
+      font-size: 13px; font-weight: 600; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.05em;
+      margin-bottom: 14px;
+    }
+    .menu-btns { display: flex; flex-direction: column; gap: 10px; }
+    .menu-btn {
+      width: 100%; padding: 16px 18px;
+      border: 1.5px solid var(--border); border-radius: var(--radius-md);
+      background: var(--surface); cursor: pointer; font-family: inherit;
+      display: flex; align-items: center; gap: 14px;
+      transition: all 0.18s; text-align: left;
+    }
+    .menu-btn:hover { border-color: var(--brand-dark); background: #f0fafc; }
+    .menu-btn .menu-icon { font-size: 28px; flex-shrink: 0; }
+    .menu-btn .menu-text { flex: 1; }
+    .menu-btn .menu-text strong { display: block; font-size: 14px; font-weight: 600; color: var(--text); }
+    .menu-btn .menu-text span { display: block; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    .menu-btn .arrow { color: var(--text-muted); font-size: 16px; }
+    .menu-btn.cartao:hover { border-color: var(--brand-dark); }
+    .menu-btn.dinheiro:hover { border-color: #d97706; background: #fffbf0; }
+
+    /* ══════════════════════════════════════
+       VIEW: CARTÃO — igual ao v1.4
+    ══════════════════════════════════════ */
     .tabs { display: flex; border-bottom: 1px solid var(--border); }
     .tab {
       flex: 1; padding: 11px 4px; font-size: 13px; font-weight: 500;
@@ -94,11 +129,10 @@
       transition: color 0.15s, border-color 0.15s;
     }
     .tab.active { color: var(--brand-dark); border-bottom-color: var(--brand-dark); }
-
     .panel { display: none; }
     .panel.visible { display: block; }
-    .form-area { padding: 1rem 1.25rem; }
 
+    .form-area { padding: 1rem 1.25rem; }
     .who-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
     .who-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
     .who-btn {
@@ -109,19 +143,14 @@
       position: relative;
     }
     .who-btn .emoji { font-size: 22px; }
-    .who-btn .check {
-      position: absolute; top: 5px; right: 6px; font-size: 11px;
-      opacity: 0; transition: opacity 0.15s;
-    }
-    .who-btn.allan { background: var(--red-light); color: var(--red-deep); }
-    .who-btn.allan.sel { border-color: var(--red-deep); background: var(--red-sel); box-shadow: inset 0 0 0 1px var(--red-deep); }
-    .who-btn.allan.sel .check { opacity: 1; }
-    .who-btn.michel { background: var(--blue-light); color: var(--blue-deep); }
-    .who-btn.michel.sel { border-color: var(--blue-deep); background: var(--blue-sel); box-shadow: inset 0 0 0 1px var(--blue-deep); }
-    .who-btn.michel.sel .check { opacity: 1; }
-    .who-btn.michellan { background: var(--pink-light); color: var(--pink-deep); }
-    .who-btn.michellan.sel { border-color: var(--pink-deep); background: var(--pink-sel); box-shadow: inset 0 0 0 1px var(--pink-deep); }
-    .who-btn.michellan.sel .check { opacity: 1; }
+    .who-btn .check { position: absolute; top: 5px; right: 6px; font-size: 11px; opacity: 0; transition: opacity 0.15s; }
+    .who-btn.allan      { background: var(--red-light);  color: var(--red-deep);  }
+    .who-btn.allan.sel  { border-color: var(--red-deep);  background: #f5b8b5; box-shadow: inset 0 0 0 1px var(--red-deep); }
+    .who-btn.michel     { background: var(--blue-light); color: var(--blue-deep); }
+    .who-btn.michel.sel { border-color: var(--blue-deep); background: #b5cef7; box-shadow: inset 0 0 0 1px var(--blue-deep); }
+    .who-btn.michellan     { background: var(--pink-light); color: var(--pink-deep); }
+    .who-btn.michellan.sel { border-color: var(--pink-deep); background: #f5b0cc; box-shadow: inset 0 0 0 1px var(--pink-deep); }
+    .who-btn.sel .check { opacity: 1; }
 
     .form-row { margin-bottom: 12px; }
     .form-row label { font-size: 12px; color: var(--text-muted); display: block; margin-bottom: 4px; font-weight: 500; }
@@ -158,24 +187,21 @@
       font-size: 11px; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.04em;
     }
-    .hist-header span:nth-child(3) { text-align: right; }
-    .hist-header span:nth-child(4) { text-align: center; }
     .hist-body { padding: 0 0 0.5rem; max-height: 55vh; overflow-y: auto; }
     .entry-row {
       display: grid; grid-template-columns: 1.4fr 1.8fr 1.2fr 1.1fr; gap: 4px;
       padding: 9px 1.25rem; border-bottom: 1px solid var(--border);
-      font-size: 13px; align-items: center;
-      animation: pop 0.2s ease;
+      font-size: 13px; align-items: center; animation: pop 0.2s ease;
     }
     .entry-row:last-child { border-bottom: none; }
     .entry-row .lbl-mes { color: var(--text-muted); font-size: 11px; }
-    .entry-row .val { font-weight: 600; text-align: right; color: var(--text); }
+    .entry-row .val { font-weight: 600; text-align: right; }
     .badge {
       display: inline-block; padding: 2px 7px; border-radius: 20px;
       font-size: 11px; font-weight: 600; text-align: center;
     }
-    .badge.allan { background: var(--red-light); color: var(--red-deep); }
-    .badge.michel { background: var(--blue-light); color: var(--blue-deep); }
+    .badge.allan     { background: var(--red-light);  color: var(--red-deep);  }
+    .badge.michel    { background: var(--blue-light); color: var(--blue-deep); }
     .badge.michellan { background: var(--pink-light); color: var(--pink-deep); }
     .empty { text-align: center; color: var(--text-muted); font-size: 13px; padding: 2.5rem 1rem; }
     .total-bar {
@@ -185,6 +211,32 @@
     }
     .total-bar span:last-child { color: var(--green-btn-text); }
 
+    /* ══════════════════════════════════════
+       VIEW: DINHEIRO
+    ══════════════════════════════════════ */
+    .din-setup { padding: 1.25rem; }
+    .din-setup .who-btns { grid-template-columns: 1fr 1fr; }
+
+    .saldo-card {
+      margin: 0 1.25rem 1rem;
+      padding: 14px 16px;
+      border-radius: var(--radius-md);
+      border: 1.5px solid var(--border);
+      background: var(--surface);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .saldo-card.positivo { border-color: #86efac; background: #f0fdf4; }
+    .saldo-card.negativo { border-color: #fca5a5; background: #fef2f2; }
+    .saldo-card.carregando { border-color: var(--border); background: #f8f9fa; }
+    .saldo-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .saldo-valor { font-size: 20px; font-weight: 700; color: var(--text); }
+    .saldo-card.positivo .saldo-valor { color: #15803d; }
+    .saldo-card.negativo .saldo-valor { color: var(--red-deep); }
+    .saldo-spinner { font-size: 18px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .din-form { padding: 0 1.25rem 1.25rem; }
+
     /* Toast */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
@@ -193,7 +245,7 @@
       opacity: 0; transition: opacity 0.25s; pointer-events: none;
       white-space: nowrap; z-index: 99;
     }
-    .toast.ok { background: #1a5c30; color: #fff; }
+    .toast.ok  { background: #1a5c30; color: #fff; }
     .toast.err { background: var(--red-deep); color: #fff; }
     .toast.show { opacity: 1; }
 
@@ -205,46 +257,30 @@
       position: fixed; inset: 0; z-index: 200;
       background: var(--bg);
       display: flex; align-items: center; justify-content: center;
-      padding: 1.5rem;
-      transition: opacity 0.35s;
+      padding: 1.5rem; transition: opacity 0.35s;
     }
     #tela-login.saindo { opacity: 0; pointer-events: none; }
-
     .login-card {
-      background: var(--surface);
-      border-radius: var(--radius-lg);
+      background: var(--surface); border-radius: var(--radius-lg);
       border: 0.5px solid var(--border);
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-      width: 100%; max-width: 340px;
-      overflow: hidden;
+      width: 100%; max-width: 340px; overflow: hidden;
     }
-    .login-header {
-      background: var(--brand);
-      padding: 2rem 1.5rem 1.5rem;
-      text-align: center;
-    }
-    .login-header .lock-icon {
-      font-size: 36px; display: block; margin-bottom: 8px;
-    }
-    .login-header h2 {
-      color: #1a4f5e; font-size: 17px; font-weight: 600; margin: 0;
-    }
-    .login-header p {
-      color: #2a6f82; font-size: 13px; margin-top: 4px;
-    }
+    .login-header { background: var(--brand); padding: 2rem 1.5rem 1.5rem; text-align: center; }
+    .login-header .lock-icon { font-size: 36px; display: block; margin-bottom: 8px; }
+    .login-header h2 { color: #1a4f5e; font-size: 17px; font-weight: 600; margin: 0; }
+    .login-header p { color: #2a6f82; font-size: 13px; margin-top: 4px; }
     .login-body { padding: 1.5rem; }
     .login-body label {
       font-size: 12px; color: var(--text-muted); font-weight: 500;
-      text-transform: uppercase; letter-spacing: 0.04em;
-      display: block; margin-bottom: 6px;
+      text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 6px;
     }
     .login-input-wrap { position: relative; }
     .login-input-wrap input {
       width: 100%; padding: 11px 40px 11px 12px;
       font-size: 18px; letter-spacing: 4px; text-align: center;
       border: 1px solid var(--border); border-radius: var(--radius-md);
-      background: var(--surface); color: var(--text);
-      font-family: inherit; transition: border-color 0.15s;
+      background: var(--surface); color: var(--text); font-family: inherit;
     }
     .login-input-wrap input:focus { outline: none; border-color: var(--brand-dark); }
     .login-input-wrap input.err-field { border-color: var(--red-deep); animation: shake 0.3s; }
@@ -253,10 +289,7 @@
       background: none; border: none; cursor: pointer; font-size: 18px;
       color: var(--text-muted); padding: 4px;
     }
-    .login-erro {
-      font-size: 12px; color: var(--red-deep); text-align: center;
-      margin-top: 8px; min-height: 16px;
-    }
+    .login-erro { font-size: 12px; color: var(--red-deep); text-align: center; margin-top: 8px; min-height: 16px; }
     .btn-entrar {
       width: 100%; padding: 12px; margin-top: 16px;
       border: none; border-radius: var(--radius-md);
@@ -266,11 +299,10 @@
     }
     .btn-entrar:hover { opacity: 0.88; }
     .btn-entrar:active { transform: scale(0.98); }
-
     @keyframes shake {
       0%,100% { transform: translateX(0); }
-      20%,60% { transform: translateX(-6px); }
-      40%,80% { transform: translateX(6px); }
+      20%,60%  { transform: translateX(-6px); }
+      40%,80%  { transform: translateX(6px); }
     }
   </style>
 </head>
@@ -290,7 +322,7 @@
         <input type="password" id="campo-senha" inputmode="numeric"
                maxlength="20" placeholder="••••••••"
                onkeydown="if(event.key==='Enter') tentarEntrar()">
-        <button class="toggle-pass" onclick="toggleVerSenha()" tabindex="-1" aria-label="Mostrar/ocultar senha">👁</button>
+        <button class="toggle-pass" onclick="toggleVerSenha()" tabindex="-1">👁</button>
       </div>
       <div class="login-erro" id="login-erro"></div>
       <button class="btn-entrar" onclick="tentarEntrar()">Entrar</button>
@@ -298,282 +330,478 @@
   </div>
 </div>
 
+<!-- ══ APP ══ -->
 <div class="screen">
   <div class="topbar">
-    <!-- Ícone de carteira inline SVG -->
+    <button class="back-btn" id="back-btn" onclick="voltarMenu()" aria-label="Voltar">&#8592;</button>
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a4f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
       <path d="M16 3H8L6 7h12l-2-4z"/>
       <circle cx="17" cy="13" r="1" fill="#1a4f5e"/>
     </svg>
-    <h1>Controle de Gastos</h1>
+    <h1 id="topbar-titulo">Controle de Gastos</h1>
   </div>
 
-  <div class="tabs">
-    <button class="tab active" onclick="showPanel('reg', this)">＋ Registrar</button>
-    <button class="tab" onclick="showPanel('hist', this)">☰ Lançamentos</button>
+  <!-- ════ VIEW: MENU ════ -->
+  <div class="view visible" id="view-menu">
+    <div class="menu-area">
+      <div class="menu-titulo">O que você quer registrar?</div>
+      <div class="menu-btns">
+        <button class="menu-btn cartao" onclick="irParaCartao()">
+          <span class="menu-icon">💳</span>
+          <span class="menu-text">
+            <strong>Gasto no Cartão</strong>
+            <span>Registrar gasto de cartão de crédito</span>
+          </span>
+          <span class="arrow">›</span>
+        </button>
+        <button class="menu-btn dinheiro" onclick="irParaDinheiro()">
+          <span class="menu-icon">💵</span>
+          <span class="menu-text">
+            <strong>Gasto no Dinheiro</strong>
+            <span>Ver saldo e registrar gasto em espécie</span>
+          </span>
+          <span class="arrow">›</span>
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- PAINEL REGISTRAR -->
-  <div class="panel visible" id="panel-reg">
-    <div class="form-area">
-      <div class="who-label">Gasto de quem?</div>
-      <div class="who-btns">
-        <button class="who-btn allan sel" onclick="selectWho('allan', this)">
-          <span class="check">✓</span>
-          <span class="emoji">👨🏻‍🦱</span>Allan
-        </button>
-        <button class="who-btn michel" onclick="selectWho('michel', this)">
-          <span class="check">✓</span>
-          <span class="emoji">👨🏽‍🦱</span>Michel
-        </button>
-        <button class="who-btn michellan" onclick="selectWho('michellan', this)">
-          <span class="check">✓</span>
-          <span class="emoji">🩷</span>Michellan
-        </button>
-      </div>
+  <!-- ════ VIEW: CARTÃO ════ -->
+  <div class="view" id="view-cartao">
+    <div class="tabs">
+      <button class="tab active" onclick="showPanel('reg', this)">＋ Registrar</button>
+      <button class="tab" onclick="showPanel('hist', this)">☰ Lançamentos</button>
+    </div>
 
-      <div class="split">
-        <div class="form-row">
-          <label>Mês</label>
-          <select id="mes">
-            <option>Janeiro</option><option>Fevereiro</option><option>Março</option>
-            <option>Abril</option><option>Maio</option><option selected>Junho</option>
-            <option>Julho</option><option>Agosto</option><option>Setembro</option>
-            <option>Outubro</option><option>Novembro</option><option>Dezembro</option>
-          </select>
+    <div class="panel visible" id="panel-reg">
+      <div class="form-area">
+        <div class="who-label">Gasto de quem?</div>
+        <div class="who-btns">
+          <button class="who-btn allan sel" onclick="selectWho('allan', this, 'cartao')">
+            <span class="check">✓</span><span class="emoji">👨🏻‍🦱</span>Allan
+          </button>
+          <button class="who-btn michel" onclick="selectWho('michel', this, 'cartao')">
+            <span class="check">✓</span><span class="emoji">👨🏽‍🦱</span>Michel
+          </button>
+          <button class="who-btn michellan" onclick="selectWho('michellan', this, 'cartao')">
+            <span class="check">✓</span><span class="emoji">🩷</span>Michellan
+          </button>
+        </div>
+        <div class="split">
+          <div class="form-row">
+            <label>Mês</label>
+            <select id="mes-cartao"></select>
+          </div>
+          <div class="form-row">
+            <label>Ano</label>
+            <input type="number" id="ano-cartao" value="2026" min="2020" max="2099" style="text-align:center;">
+          </div>
         </div>
         <div class="form-row">
-          <label>Ano</label>
-          <input type="number" id="ano" value="2026" min="2020" max="2099" style="text-align:center;">
+          <label>Descrição do gasto</label>
+          <input type="text" id="desc-cartao" placeholder="Ex: Mercado, Academia...">
+        </div>
+        <div class="form-row">
+          <label>Valor (R$)</label>
+          <input type="text" id="valor-cartao" inputmode="numeric" placeholder="R$ 0,00" autocomplete="off">
+        </div>
+        <button class="btn-reg" id="btn-cartao" onclick="registrar('cartao')">
+          ✈ Registrar gasto
+        </button>
+      </div>
+    </div>
+
+    <div class="panel" id="panel-hist">
+      <div class="hist-area">
+        <div class="hist-header">
+          <span>Período</span><span>Gasto</span>
+          <span style="text-align:right">Valor</span>
+          <span style="text-align:center">Quem</span>
+        </div>
+        <div class="hist-body" id="hist-body">
+          <div class="empty">Nenhum lançamento ainda</div>
+        </div>
+        <div class="total-bar" id="total-bar" style="display:none">
+          <span>Total registrado</span>
+          <span id="total-val"></span>
         </div>
       </div>
+    </div>
+  </div>
 
+  <!-- ════ VIEW: DINHEIRO ════ -->
+  <div class="view" id="view-dinheiro">
+
+    <!-- Seleção de quem + mês -->
+    <div class="din-setup" id="din-setup">
+      <div class="who-label">Quem está gastando?</div>
+      <div class="who-btns" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">
+        <button class="who-btn allan sel" id="din-btn-allan" onclick="selectWho('allan', this, 'dinheiro')">
+          <span class="check">✓</span><span class="emoji">👨🏻‍🦱</span>Allan
+        </button>
+        <button class="who-btn michel" id="din-btn-michel" onclick="selectWho('michel', this, 'dinheiro')">
+          <span class="check">✓</span><span class="emoji">👨🏽‍🦱</span>Michel
+        </button>
+      </div>
+      <div class="form-row">
+        <label>Mês de referência</label>
+        <select id="mes-dinheiro" onchange="buscarSaldo()"></select>
+      </div>
+    </div>
+
+    <!-- Card de saldo -->
+    <div class="saldo-card carregando" id="saldo-card">
+      <div>
+        <div class="saldo-label" id="saldo-label">Buscando saldo...</div>
+        <div class="saldo-valor" id="saldo-valor">—</div>
+      </div>
+      <span class="saldo-spinner" id="saldo-spinner">⏳</span>
+    </div>
+
+    <!-- Formulário de gasto -->
+    <div class="din-form">
       <div class="form-row">
         <label>Descrição do gasto</label>
-        <input type="text" id="desc" placeholder="Ex: Mercado, Academia...">
+        <input type="text" id="desc-dinheiro" placeholder="Ex: Padaria, Uber...">
       </div>
       <div class="form-row">
         <label>Valor (R$)</label>
-        <input type="text" id="valor-display" inputmode="numeric" placeholder="R$ 0,00" autocomplete="off">
+        <input type="text" id="valor-dinheiro" inputmode="numeric" placeholder="R$ 0,00" autocomplete="off">
       </div>
-
-      <button class="btn-reg" id="btn-reg" onclick="registrar()">
+      <button class="btn-reg" id="btn-dinheiro" onclick="registrar('dinheiro')">
         ✈ Registrar gasto
       </button>
     </div>
   </div>
 
-  <!-- PAINEL HISTÓRICO -->
-  <div class="panel" id="panel-hist">
-    <div class="hist-area">
-      <div class="hist-header">
-        <span>Período</span>
-        <span>Gasto</span>
-        <span style="text-align:right">Valor</span>
-        <span style="text-align:center">Quem</span>
-      </div>
-      <div class="hist-body" id="hist-body">
-        <div class="empty">Nenhum lançamento ainda</div>
-      </div>
-      <div class="total-bar" id="total-bar" style="display:none">
-        <span>Total registrado</span>
-        <span id="total-val"></span>
-      </div>
-    </div>
-  </div>
-</div>
+</div><!-- /.screen -->
 
 <div class="toast" id="toast"></div>
 
 <script>
-  // ── Login ────────────────────────────────────────────────
-  const SENHA = '16102018';
+// ═══════════════════════════════════════════════════════
+//  ESTADO
+// ═══════════════════════════════════════════════════════
+const SENHA       = '16102018';
+const STORAGE_KEY = 'gastos_historico';
 
-  function tentarEntrar() {
-    const input = document.getElementById('campo-senha');
-    const erro  = document.getElementById('login-erro');
-    if (input.value === SENHA) {
-      erro.textContent = '';
-      const tela = document.getElementById('tela-login');
-      tela.classList.add('saindo');
-      setTimeout(() => tela.style.display = 'none', 360);
-    } else {
-      input.classList.add('err-field');
-      erro.textContent = 'Senha incorreta. Tente novamente.';
-      input.value = '';
-      setTimeout(() => input.classList.remove('err-field'), 600);
-      input.focus();
-    }
+let quemCartao   = 'allan';
+let quemDinheiro = 'allan';
+let centavosCartao   = 0;
+let centavosDinheiro = 0;
+let saldoAtual = null; // valor numérico lido da planilha
+
+const lancamentos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+
+const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+               'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+// ═══════════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', function() {
+  const mesAtual = MESES[new Date().getMonth()];
+
+  // Preenche selects de mês
+  ['mes-cartao', 'mes-dinheiro'].forEach(function(id) {
+    const sel = document.getElementById(id);
+    MESES.forEach(function(m) {
+      const opt = document.createElement('option');
+      opt.value = m; opt.textContent = m;
+      if (m === mesAtual) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  });
+
+  if (lancamentos.length) renderHist();
+});
+
+// ═══════════════════════════════════════════════════════
+//  LOGIN
+// ═══════════════════════════════════════════════════════
+function tentarEntrar() {
+  const input = document.getElementById('campo-senha');
+  const erro  = document.getElementById('login-erro');
+  if (input.value === SENHA) {
+    erro.textContent = '';
+    const tela = document.getElementById('tela-login');
+    tela.classList.add('saindo');
+    setTimeout(() => tela.style.display = 'none', 360);
+  } else {
+    input.classList.add('err-field');
+    erro.textContent = 'Senha incorreta. Tente novamente.';
+    input.value = '';
+    setTimeout(() => input.classList.remove('err-field'), 600);
+    input.focus();
   }
+}
+function toggleVerSenha() {
+  const i = document.getElementById('campo-senha');
+  i.type = i.type === 'password' ? 'text' : 'password';
+}
 
-  function toggleVerSenha() {
-    const input = document.getElementById('campo-senha');
-    input.type = input.type === 'password' ? 'text' : 'password';
+// ═══════════════════════════════════════════════════════
+//  NAVEGAÇÃO
+// ═══════════════════════════════════════════════════════
+function mostrarView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('visible'));
+  document.getElementById('view-' + id).classList.add('visible');
+}
+
+function irParaCartao() {
+  mostrarView('cartao');
+  document.getElementById('topbar-titulo').textContent = 'Gasto no Cartão';
+  document.getElementById('back-btn').classList.add('visible');
+}
+
+function irParaDinheiro() {
+  mostrarView('dinheiro');
+  document.getElementById('topbar-titulo').textContent = 'Gasto no Dinheiro';
+  document.getElementById('back-btn').classList.add('visible');
+  buscarSaldo();
+}
+
+function voltarMenu() {
+  mostrarView('menu');
+  document.getElementById('topbar-titulo').textContent = 'Controle de Gastos';
+  document.getElementById('back-btn').classList.remove('visible');
+}
+
+function showPanel(id, btn) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
+  document.getElementById('panel-' + id).classList.add('visible');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ═══════════════════════════════════════════════════════
+//  SELEÇÃO DE PESSOA
+// ═══════════════════════════════════════════════════════
+function selectWho(who, el, contexto) {
+  if (contexto === 'cartao') {
+    quemCartao = who;
+    document.querySelectorAll('#view-cartao .who-btn').forEach(b => b.classList.remove('sel'));
+  } else {
+    quemDinheiro = who;
+    document.querySelectorAll('#view-dinheiro .who-btn').forEach(b => b.classList.remove('sel'));
+    buscarSaldo();
   }
+  el.classList.add('sel');
+}
 
-  // ── Estado ──────────────────────────────────────────────
-  let quem = 'allan';
-  const STORAGE_KEY = 'gastos_historico';
-  const lancamentos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  let centavos = 0;
+// ═══════════════════════════════════════════════════════
+//  CAMPO VALOR (centavos inteligentes)
+// ═══════════════════════════════════════════════════════
+function setupValorInput(inputId, getter, setter) {
+  const el = document.getElementById(inputId);
 
-  // ── Navegação ───────────────────────────────────────────
-  function showPanel(id, btn) {
-    document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
-    document.getElementById('panel-' + id).classList.add('visible');
-    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-  }
-
-  function selectWho(who, el) {
-    quem = who;
-    document.querySelectorAll('.who-btn').forEach(b => b.classList.remove('sel'));
-    el.classList.add('sel');
-  }
-
-  // ── Campo de valor inteligente (centavos) ───────────────
-  const valorEl = document.getElementById('valor-display');
-
-  function formatCentavos(c) {
+  function fmt(c) {
     if (c === 0) return '';
-    const str = String(c).padStart(3, '0');
-    const intPart = str.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    const decPart = str.slice(-2);
-    return 'R$ ' + intPart + ',' + decPart;
+    const s = String(c).padStart(3, '0');
+    return 'R$ ' + s.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + s.slice(-2);
   }
 
-  valorEl.addEventListener('keydown', function(e) {
+  el.addEventListener('keydown', function(e) {
     if (e.key === 'Backspace') {
-      centavos = Math.floor(centavos / 10);
-      this.value = formatCentavos(centavos);
+      setter(Math.floor(getter() / 10));
+      this.value = fmt(getter());
       e.preventDefault();
     }
   });
-
-  valorEl.addEventListener('input', function(e) {
-    const digit = (e.data || '').replace(/\D/g, '');
-    if (!digit) return;
-    for (const d of digit) {
-      if (centavos > 9999999) continue;
-      centavos = centavos * 10 + parseInt(d);
+  el.addEventListener('input', function(e) {
+    const d = (e.data || '').replace(/\D/g, '');
+    if (!d) return;
+    for (const x of d) {
+      if (getter() > 9999999) continue;
+      setter(getter() * 10 + parseInt(x));
     }
-    this.value = formatCentavos(centavos);
+    this.value = fmt(getter());
   });
+  el.addEventListener('focus', function() { this.classList.remove('err-field'); });
 
-  valorEl.addEventListener('focus', function() {
-    this.classList.remove('err-field');
-  });
+  return {
+    getFloat: () => getter() / 100,
+    reset: () => { setter(0); el.value = ''; }
+  };
+}
 
-  function getValorFloat() { return centavos / 100; }
+const valorCartao   = setupValorInput('valor-cartao',
+  () => centavosCartao,   v => centavosCartao = v);
+const valorDinheiro = setupValorInput('valor-dinheiro',
+  () => centavosDinheiro, v => centavosDinheiro = v);
 
-  function resetValor() {
-    centavos = 0;
-    valorEl.value = '';
-  }
+// ═══════════════════════════════════════════════════════
+//  BUSCAR SALDO (doGet)
+// ═══════════════════════════════════════════════════════
+function buscarSaldo() {
+  const mes    = document.getElementById('mes-dinheiro').value;
+  const pessoa = quemDinheiro;
+  if (!mes) return;
 
-  // ── Registrar ────────────────────────────────────────────
-  function registrar() {
-    const mes   = document.getElementById('mes').value;
-    const ano   = document.getElementById('ano').value || '2026';
-    const desc  = document.getElementById('desc').value.trim();
-    const valor = getValorFloat();
-    const descEl = document.getElementById('desc');
+  const card    = document.getElementById('saldo-card');
+  const label   = document.getElementById('saldo-label');
+  const valor   = document.getElementById('saldo-valor');
+  const spinner = document.getElementById('saldo-spinner');
 
-    descEl.classList.remove('err-field');
-    valorEl.classList.remove('err-field');
-    let ok = true;
-    if (!desc)     { descEl.classList.add('err-field');  ok = false; }
-    if (valor <= 0){ valorEl.classList.add('err-field'); ok = false; }
-    if (!ok) return;
+  card.className = 'saldo-card carregando';
+  label.textContent = 'Buscando saldo...';
+  valor.textContent = '—';
+  spinner.style.display = 'block';
+  saldoAtual = null;
 
-    const btn = document.getElementById('btn-reg');
-    btn.classList.add('sending');
-    btn.textContent = '⏳ Enviando...';
+  const url = APPS_SCRIPT_URL
+    + '?pessoa=' + encodeURIComponent(capitalizarPessoa(pessoa))
+    + '&mes='    + encodeURIComponent(mes);
 
-    const payload = { mes, ano, desc, valor, pessoa: capitalizarPessoa(quem), dispositivo: detectarDispositivo() };
-
-    fetch(APPS_SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',           // Apps Script exige no-cors
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+  fetch(url)
+    .then(r => r.json())
+    .then(function(data) {
+      spinner.style.display = 'none';
+      if (data.status === 'ok') {
+        saldoAtual = parseFloat(data.saldo) || 0;
+        label.textContent = 'Saldo disponível em ' + mes;
+        valor.textContent = formatarMoeda(saldoAtual);
+        card.className = 'saldo-card ' + (saldoAtual >= 0 ? 'positivo' : 'negativo');
+      } else {
+        label.textContent = 'Não foi possível carregar';
+        valor.textContent = data.mensagem || 'Erro';
+        card.className = 'saldo-card negativo';
+      }
     })
-    .then(() => {
-      lancamentos.unshift({ mes, ano, desc, valor, quem });
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(lancamentos));
-      renderHist();
-      descEl.value = '';
-      resetValor();
-      btn.classList.remove('sending');
-      btn.textContent = '✈ Registrar gasto';
-      toast('✓ Gasto enviado!', 'ok');
-    })
-    .catch(() => {
-      btn.classList.remove('sending');
-      btn.classList.add('erro-envio');
-      btn.textContent = '⚠ Erro ao enviar — tente novamente';
-      setTimeout(() => {
-        btn.classList.remove('erro-envio');
-        btn.textContent = '✈ Registrar gasto';
-      }, 3000);
-      toast('Erro ao conectar com a planilha', 'err');
+    .catch(function() {
+      spinner.style.display = 'none';
+      label.textContent = 'Erro de conexão';
+      valor.textContent = 'Tente novamente';
+      card.className = 'saldo-card negativo';
     });
-  }
+}
 
-  // ── Detecção de dispositivo ───────────────────────────────
-  function detectarDispositivo() {
-    const ua = navigator.userAgent || '';
-    const standalone = window.navigator.standalone; // true quando salvo na home do iOS
-    const isAndroidApp = window.matchMedia('(display-mode: standalone)').matches;
+// ═══════════════════════════════════════════════════════
+//  REGISTRAR GASTO
+// ═══════════════════════════════════════════════════════
+function registrar(tipo) {
+  const isCartao = tipo === 'cartao';
 
-    if (/iPhone|iPad|iPod/i.test(ua)) {
-      return standalone ? 'iOS (App)' : 'iOS (Safari)';
+  const mes   = document.getElementById(isCartao ? 'mes-cartao'   : 'mes-dinheiro').value;
+  const ano   = isCartao ? (document.getElementById('ano-cartao').value || '2026') : String(new Date().getFullYear());
+  const desc  = document.getElementById(isCartao ? 'desc-cartao'  : 'desc-dinheiro').value.trim();
+  const quem  = isCartao ? quemCartao : quemDinheiro;
+  const vCtrl = isCartao ? valorCartao : valorDinheiro;
+  const valor = vCtrl.getFloat();
+
+  const descEl  = document.getElementById(isCartao ? 'desc-cartao'  : 'desc-dinheiro');
+  const valorEl = document.getElementById(isCartao ? 'valor-cartao' : 'valor-dinheiro');
+  const btnId   = isCartao ? 'btn-cartao' : 'btn-dinheiro';
+  const btn     = document.getElementById(btnId);
+
+  descEl.classList.remove('err-field');
+  valorEl.classList.remove('err-field');
+  let ok = true;
+  if (!desc)     { descEl.classList.add('err-field');  ok = false; }
+  if (valor <= 0){ valorEl.classList.add('err-field'); ok = false; }
+  if (!ok) return;
+
+  btn.classList.add('sending');
+  btn.textContent = '⏳ Enviando...';
+
+  const payload = {
+    mes, ano, desc, valor,
+    pessoa: capitalizarPessoa(quem),
+    tipo: isCartao ? 'Cartão' : 'Dinheiro',
+    dispositivo: detectarDispositivo()
+  };
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  })
+  .then(function() {
+    lancamentos.unshift({ mes, ano, desc, valor, quem, tipo: payload.tipo });
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(lancamentos));
+    renderHist();
+    descEl.value = '';
+    vCtrl.reset();
+    btn.classList.remove('sending');
+    btn.textContent = '✈ Registrar gasto';
+    toast('✓ Gasto enviado!', 'ok');
+
+    // Atualiza saldo local subtraindo o valor
+    if (!isCartao && saldoAtual !== null) {
+      saldoAtual -= valor;
+      document.getElementById('saldo-valor').textContent = formatarMoeda(saldoAtual);
+      const card = document.getElementById('saldo-card');
+      card.className = 'saldo-card ' + (saldoAtual >= 0 ? 'positivo' : 'negativo');
     }
-    if (/Android/i.test(ua)) {
-      return isAndroidApp ? 'Android (App)' : 'Android (Navegador)';
-    }
-    return 'Web Desktop';
-  }
+  })
+  .catch(function() {
+    btn.classList.remove('sending');
+    btn.classList.add('erro-envio');
+    btn.textContent = '⚠ Erro ao enviar — tente novamente';
+    setTimeout(() => {
+      btn.classList.remove('erro-envio');
+      btn.textContent = '✈ Registrar gasto';
+    }, 3000);
+    toast('Erro ao conectar com a planilha', 'err');
+  });
+}
 
-  // ── Capitalizar pessoa ────────────────────────────────────
-  function capitalizarPessoa(p) {
-    const map = { allan: 'Allan', michel: 'Michel', michellan: 'Michellan' };
-    return map[p] || p;
+// ═══════════════════════════════════════════════════════
+//  HISTÓRICO
+// ═══════════════════════════════════════════════════════
+function renderHist() {
+  const body = document.getElementById('hist-body');
+  if (!lancamentos.length) {
+    body.innerHTML = '<div class="empty">Nenhum lançamento ainda</div>';
+    document.getElementById('total-bar').style.display = 'none';
+    return;
   }
+  body.innerHTML = lancamentos.map(function(l) {
+    const tipoTag = l.tipo === 'Dinheiro'
+      ? '<span style="font-size:10px;background:#FFF8E1;color:#B45309;padding:1px 5px;border-radius:8px;margin-left:3px;">💵</span>'
+      : '';
+    return `<div class="entry-row">
+      <span class="lbl-mes">${l.mes} ${l.ano}</span>
+      <span>${l.desc}${tipoTag}</span>
+      <span class="val">R$ ${l.valor.toFixed(2).replace('.', ',')}</span>
+      <span style="text-align:center"><span class="badge ${l.quem}">${capitalizarPessoa(l.quem)}</span></span>
+    </div>`;
+  }).join('');
+  const total = lancamentos.reduce((s, l) => s + l.valor, 0);
+  document.getElementById('total-val').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
+  document.getElementById('total-bar').style.display = 'flex';
+}
 
-  // ── Histórico ─────────────────────────────────────────────
-  function renderHist() {
-    const body = document.getElementById('hist-body');
-    if (!lancamentos.length) {
-      body.innerHTML = '<div class="empty">Nenhum lançamento ainda</div>';
-      document.getElementById('total-bar').style.display = 'none';
-      return;
-    }
-    body.innerHTML = lancamentos.map(l =>
-      `<div class="entry-row">
-        <span class="lbl-mes">${l.mes} ${l.ano}</span>
-        <span>${l.desc}</span>
-        <span class="val">R$ ${l.valor.toFixed(2).replace('.', ',')}</span>
-        <span style="text-align:center"><span class="badge ${l.quem}">${capitalizarPessoa(l.quem)}</span></span>
-      </div>`
-    ).join('');
-    const total = lancamentos.reduce((s, l) => s + l.valor, 0);
-    document.getElementById('total-val').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
-    document.getElementById('total-bar').style.display = 'flex';
-  }
+// ═══════════════════════════════════════════════════════
+//  UTILITÁRIOS
+// ═══════════════════════════════════════════════════════
+function capitalizarPessoa(p) {
+  return { allan: 'Allan', michel: 'Michel', michellan: 'Michellan' }[p] || p;
+}
 
-  // ── Toast ─────────────────────────────────────────────────
-  function toast(msg, tipo = 'ok') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = 'toast ' + tipo;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
+function formatarMoeda(v) {
+  return 'R$ ' + Math.abs(v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    + (v < 0 ? ' (negativo)' : '');
+}
 
-  // ── Inicializar histórico salvo ───────────────────────────
-  if (lancamentos.length) renderHist();
+function detectarDispositivo() {
+  const ua = navigator.userAgent || '';
+  const standalone = window.navigator.standalone;
+  const isAndroidApp = window.matchMedia('(display-mode: standalone)').matches;
+  if (/iPhone|iPad|iPod/i.test(ua)) return standalone ? 'iOS (App)' : 'iOS (Safari)';
+  if (/Android/i.test(ua)) return isAndroidApp ? 'Android (App)' : 'Android (Navegador)';
+  return 'Web Desktop';
+}
+
+function toast(msg, tipo = 'ok') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast ' + tipo;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
 </script>
 </body>
 </html>
