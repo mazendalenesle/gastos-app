@@ -13,7 +13,7 @@
   <title>Controle de Gastos</title>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgn0E6wsDrka9ijMP5NtEr1IJSCG3gUd7oP9lrxMYFf8yc_KKQf_1E6eqJO9_8V3d8/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwgHC7M-YzvVheszwvTHXrL6_FY6386McXPG4fOkX6NcVj1pJdrgorfVVbWZEvtJeV8/exec';
 
     function makeIcon(size) {
       const c = document.createElement('canvas');
@@ -520,7 +520,7 @@ const TEMAS = {
   junina:    { classe: 'tema-junina',   loginIcon: '🎪', particles: ['🌽','⭐','🎇','🎆'] },
   copa:      { classe: 'tema-copa',     loginIcon: '⚽', particles: ['⚽','🌽','🇧🇷','⭐'] },
   halloween: { classe: 'tema-halloween',loginIcon: '🎃', particles: ['🦇','🕷️','🎃','🕸️'] },
-  natal:     { classe: 'tema-natal',    loginIcon: '🎄', particles: ['❄️','⭐','🎄','🎅🏻'] }
+  natal:     { classe: 'tema-natal',    loginIcon: '🎄', particles: ['❄️','⭐','🎄','✨'] }
 };
 
 function detectarTema() {
@@ -613,11 +613,9 @@ function tentarEntrar() {
   btn.textContent = '⏳ Verificando...';
   erro.textContent = '';
 
-  fetch(APPS_SCRIPT_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ acao: 'login', senha: senha })
-  })
+  // Login usa GET para poder ler a resposta (POST com no-cors não permite leitura)
+  const loginUrl = APPS_SCRIPT_URL + '?acao=login&senha=' + encodeURIComponent(senha);
+  fetch(loginUrl)
   .then(r => r.json())
   .then(function(data) {
     btn.classList.remove('verificando');
