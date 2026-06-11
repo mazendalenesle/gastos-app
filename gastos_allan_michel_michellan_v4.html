@@ -13,7 +13,7 @@
   <title>Controle de Gastos</title>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhcG-5BYNlKySkmfTI-P4_pPecqKb-VphJtW9-PxyB7gbUt2kYHXFxJLpctectJ_-9/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxgn0E6wsDrka9ijMP5NtEr1IJSCG3gUd7oP9lrxMYFf8yc_KKQf_1E6eqJO9_8V3d8/exec';
 
     function makeIcon(size) {
       const c = document.createElement('canvas');
@@ -38,9 +38,6 @@
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ══════════════════════════════════════
-       TEMA PADRÃO — Controle de Gastos
-    ══════════════════════════════════════ */
     :root {
       --brand: #80cee1;
       --brand-dark: #3a9ab5;
@@ -57,77 +54,34 @@
       --text-muted: #6b7280;
       --radius-md: 10px;
       --radius-lg: 16px;
-      /* partículas: off por padrão */
       --particles-display: none;
     }
 
-    /* ══════════════════════════════════════
-       TEMA: COPA + JUNINA (Jun/Jul 2026)
-    ══════════════════════════════════════ */
     body.tema-copa {
-      --brand: #f39c12;
-      --brand-dark: #c0392b;
-      --topbar-text: #4a1c00;
-      --bg: #fff8f0;
-      --surface: #fffaf4;
-      --border: #f5c97a;
-      --text: #4a1c00;
-      --text-muted: #8c5a00;
-      --green-btn: #f5c97a;
-      --green-btn-text: #7d3c00;
+      --brand: #f39c12; --brand-dark: #c0392b; --topbar-text: #4a1c00;
+      --bg: #fff8f0; --surface: #fffaf4; --border: #f5c97a;
+      --text: #4a1c00; --text-muted: #8c5a00;
+      --green-btn: #f5c97a; --green-btn-text: #7d3c00;
     }
-
-    /* ══════════════════════════════════════
-       TEMA: FESTA JUNINA (Jun/Jul, outros anos)
-    ══════════════════════════════════════ */
     body.tema-junina {
-      --brand: #f39c12;
-      --brand-dark: #c0392b;
-      --topbar-text: #4a1c00;
-      --bg: #fff8f0;
-      --surface: #fffaf4;
-      --border: #f5c97a;
-      --text: #4a1c00;
-      --text-muted: #8c5a00;
-      --green-btn: #f5c97a;
-      --green-btn-text: #7d3c00;
+      --brand: #f39c12; --brand-dark: #c0392b; --topbar-text: #4a1c00;
+      --bg: #fff8f0; --surface: #fffaf4; --border: #f5c97a;
+      --text: #4a1c00; --text-muted: #8c5a00;
+      --green-btn: #f5c97a; --green-btn-text: #7d3c00;
     }
-
-    /* ══════════════════════════════════════
-       TEMA: HALLOWEEN (Outubro)
-    ══════════════════════════════════════ */
     body.tema-halloween {
-      --brand: #e67e00;
-      --brand-dark: #b35c00;
-      --topbar-text: #fff3e0;
-      --bg: #120500;
-      --surface: #1a0a00;
-      --border: #5a2d00;
-      --text: #ffb347;
-      --text-muted: #c07020;
-      --green-btn: #6c0f7a;
-      --green-btn-text: #f0a0ff;
+      --brand: #e67e00; --brand-dark: #b35c00; --topbar-text: #fff3e0;
+      --bg: #120500; --surface: #1a0a00; --border: #5a2d00;
+      --text: #ffb347; --text-muted: #c07020;
+      --green-btn: #6c0f7a; --green-btn-text: #f0a0ff;
     }
-
-    /* ══════════════════════════════════════
-       TEMA: NATAL (15/Nov → 06/Jan)
-    ══════════════════════════════════════ */
     body.tema-natal {
-      --brand: #1a7a2e;
-      --brand-dark: #c8001c;
-      --topbar-text: #ffffff;
-      --bg: #f0faf2;
-      --surface: #ffffff;
-      --border: #a0d4a8;
-      --text: #1a2e1c;
-      --text-muted: #4a6b50;
-      --green-btn: #c8001c;
-      --green-btn-text: #ffffff;
+      --brand: #1a7a2e; --brand-dark: #c8001c; --topbar-text: #ffffff;
+      --bg: #f0faf2; --surface: #ffffff; --border: #a0d4a8;
+      --text: #1a2e1c; --text-muted: #4a6b50;
+      --green-btn: #c8001c; --green-btn-text: #ffffff;
     }
 
-    /* ══════════════════════════════════════
-       PARTÍCULAS ANIMADAS
-    ══════════════════════════════════════ */
     .particles {
       position: fixed; inset: 0; pointer-events: none;
       overflow: hidden; z-index: 0;
@@ -137,13 +91,8 @@
       position: absolute; top: -40px;
       animation: fall linear infinite; opacity: 0.55;
     }
-    @keyframes fall {
-      to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
-    }
+    @keyframes fall { to { transform: translateY(110vh) rotate(360deg); opacity: 0; } }
 
-    /* ══════════════════════════════════════
-       BANDEIRINHAS (Junina / Copa)
-    ══════════════════════════════════════ */
     .bandeirinha-topo {
       display: none;
       position: fixed; top: 0; left: 0; right: 0;
@@ -157,11 +106,6 @@
       clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%); opacity: 0.9;
     }
 
-
-
-    /* ══════════════════════════════════════
-       LAYOUT BASE
-    ══════════════════════════════════════ */
     body {
       background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -200,15 +144,8 @@
     .view { display: none; }
     .view.visible { display: block; }
 
-    /* ══════════════════════════════════════
-       VIEW: MENU
-    ══════════════════════════════════════ */
     .menu-area { padding: 1.5rem 1.25rem; }
-    .menu-titulo {
-      font-size: 13px; font-weight: 600; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.05em;
-      margin-bottom: 14px;
-    }
+    .menu-titulo { font-size: 13px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 14px; }
     .menu-btns { display: flex; flex-direction: column; gap: 10px; }
     .menu-btn {
       width: 100%; padding: 16px 18px;
@@ -224,9 +161,6 @@
     .menu-btn .menu-text span { display: block; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
     .menu-btn .arrow { color: var(--text-muted); font-size: 16px; }
 
-    /* ══════════════════════════════════════
-       TABS E PANELS
-    ══════════════════════════════════════ */
     .tabs { display: flex; border-bottom: 1px solid var(--border); }
     .tab {
       flex: 1; padding: 11px 4px; font-size: 13px; font-weight: 500;
@@ -238,9 +172,6 @@
     .panel { display: none; }
     .panel.visible { display: block; }
 
-    /* ══════════════════════════════════════
-       FORMULÁRIO
-    ══════════════════════════════════════ */
     .form-area { padding: 1rem 1.25rem; }
     .who-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
     .who-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
@@ -287,9 +218,6 @@
     .btn-reg.sending { opacity: 0.55; pointer-events: none; }
     .btn-reg.erro-envio { background: #FDECEA; color: var(--red-deep); }
 
-    /* ══════════════════════════════════════
-       HISTÓRICO
-    ══════════════════════════════════════ */
     .hist-area { padding: 0.75rem 0 0; }
     .hist-header {
       display: grid; grid-template-columns: 1.4fr 1.8fr 1.2fr 1.1fr; gap: 4px;
@@ -302,16 +230,12 @@
     .entry-row {
       display: grid; grid-template-columns: 1.4fr 1.8fr 1.2fr 1.1fr; gap: 4px;
       padding: 9px 1.25rem; border-bottom: 1px solid var(--border);
-      font-size: 13px; align-items: center; animation: pop 0.2s ease;
-      color: var(--text);
+      font-size: 13px; align-items: center; animation: pop 0.2s ease; color: var(--text);
     }
     .entry-row:last-child { border-bottom: none; }
     .entry-row .lbl-mes { color: var(--text-muted); font-size: 11px; }
     .entry-row .val { font-weight: 600; text-align: right; }
-    .badge {
-      display: inline-block; padding: 2px 7px; border-radius: 20px;
-      font-size: 11px; font-weight: 600; text-align: center;
-    }
+    .badge { display: inline-block; padding: 2px 7px; border-radius: 20px; font-size: 11px; font-weight: 600; text-align: center; }
     .badge.allan     { background: var(--red-light);  color: var(--red-deep);  }
     .badge.michel    { background: var(--blue-light); color: var(--blue-deep); }
     .badge.michellan { background: var(--pink-light); color: var(--pink-deep); }
@@ -319,21 +243,14 @@
     .total-bar {
       display: flex; justify-content: space-between;
       padding: 10px 1.25rem; border-top: 1px solid var(--border);
-      font-size: 13px; font-weight: 600; background: var(--bg);
-      color: var(--text);
+      font-size: 13px; font-weight: 600; background: var(--bg); color: var(--text);
     }
     .total-bar span:last-child { color: var(--green-btn-text); }
 
-    /* ══════════════════════════════════════
-       VIEW: DINHEIRO
-    ══════════════════════════════════════ */
     .din-setup { padding: 1.25rem; }
-
     .saldo-card {
-      margin: 0 1.25rem 1rem;
-      padding: 14px 16px;
-      border-radius: var(--radius-md);
-      border: 1.5px solid var(--border);
+      margin: 0 1.25rem 1rem; padding: 14px 16px;
+      border-radius: var(--radius-md); border: 1.5px solid var(--border);
       background: var(--surface);
       display: flex; align-items: center; justify-content: space-between;
     }
@@ -346,12 +263,8 @@
     .saldo-card.negativo .saldo-valor { color: var(--red-deep); }
     .saldo-spinner { font-size: 18px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-
     .din-form { padding: 0 1.25rem 1.25rem; }
 
-    /* ══════════════════════════════════════
-       TOAST
-    ══════════════════════════════════════ */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
       padding: 10px 20px; border-radius: 24px;
@@ -366,9 +279,7 @@
     @keyframes pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
     .err-field { border-color: var(--red-deep) !important; }
 
-    /* ══════════════════════════════════════
-       TELA DE LOGIN
-    ══════════════════════════════════════ */
+    /* ── Tela de login ── */
     #tela-login {
       position: fixed; inset: 0; z-index: 200;
       background: var(--bg);
@@ -387,10 +298,7 @@
     .login-header h2 { color: var(--topbar-text); font-size: 17px; font-weight: 600; margin: 0; transition: color 0.5s; }
     .login-header p { color: var(--topbar-text); opacity: 0.75; font-size: 13px; margin-top: 4px; }
     .login-body { padding: 1.5rem; }
-    .login-body label {
-      font-size: 12px; color: var(--text-muted); font-weight: 500;
-      text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 6px;
-    }
+    .login-body label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; display: block; margin-bottom: 6px; }
     .login-input-wrap { position: relative; }
     .login-input-wrap input {
       width: 100%; padding: 11px 40px 11px 12px;
@@ -415,6 +323,7 @@
     }
     .btn-entrar:hover { opacity: 0.88; }
     .btn-entrar:active { transform: scale(0.98); }
+    .btn-entrar.verificando { opacity: 0.6; pointer-events: none; }
     @keyframes shake {
       0%,100% { transform: translateX(0); }
       20%,60%  { transform: translateX(-6px); }
@@ -424,10 +333,7 @@
 </head>
 <body>
 
-<!-- Bandeirinhas (Junina / Copa) -->
 <div class="bandeirinha-topo" id="bandeirinhas-topo"></div>
-
-<!-- Partículas decorativas -->
 <div class="particles" id="particles"></div>
 
 <!-- ══ TELA DE LOGIN ══ -->
@@ -447,7 +353,7 @@
         <button class="toggle-pass" onclick="toggleVerSenha()" tabindex="-1">👁</button>
       </div>
       <div class="login-erro" id="login-erro"></div>
-      <button class="btn-entrar" onclick="tentarEntrar()">Entrar</button>
+      <button class="btn-entrar" id="btn-entrar" onclick="tentarEntrar()">Entrar</button>
     </div>
   </div>
 </div>
@@ -495,7 +401,6 @@
       <button class="tab active" onclick="showPanel('reg', this)">＋ Registrar</button>
       <button class="tab" onclick="showPanel('hist', this)">☰ Lançamentos</button>
     </div>
-
     <div class="panel visible" id="panel-reg">
       <div class="form-area">
         <div class="who-label">Gasto de quem?</div>
@@ -528,12 +433,9 @@
           <label>Valor (R$)</label>
           <input type="text" id="valor-cartao" inputmode="numeric" placeholder="R$ 0,00" autocomplete="off">
         </div>
-        <button class="btn-reg" id="btn-cartao" onclick="registrar('cartao')">
-          ✈ Registrar gasto
-        </button>
+        <button class="btn-reg" id="btn-cartao" onclick="registrar('cartao')">✈ Registrar gasto</button>
       </div>
     </div>
-
     <div class="panel" id="panel-hist">
       <div class="hist-area">
         <div class="hist-header">
@@ -554,7 +456,6 @@
 
   <!-- ════ VIEW: DINHEIRO ════ -->
   <div class="view" id="view-dinheiro">
-
     <div class="din-setup" id="din-setup">
       <div class="who-label">Quem está gastando?</div>
       <div class="who-btns" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">
@@ -570,7 +471,6 @@
         <select id="mes-dinheiro" onchange="buscarSaldo()"></select>
       </div>
     </div>
-
     <div class="saldo-card carregando" id="saldo-card">
       <div>
         <div class="saldo-label" id="saldo-label">Buscando saldo...</div>
@@ -578,7 +478,6 @@
       </div>
       <span class="saldo-spinner" id="saldo-spinner">⏳</span>
     </div>
-
     <div class="din-form">
       <div class="form-row">
         <label>Descrição do gasto</label>
@@ -588,21 +487,18 @@
         <label>Valor (R$)</label>
         <input type="text" id="valor-dinheiro" inputmode="numeric" placeholder="R$ 0,00" autocomplete="off">
       </div>
-      <button class="btn-reg" id="btn-dinheiro" onclick="registrar('dinheiro')">
-        ✈ Registrar gasto
-      </button>
+      <button class="btn-reg" id="btn-dinheiro" onclick="registrar('dinheiro')">✈ Registrar gasto</button>
     </div>
   </div>
 
 </div><!-- /.screen -->
-
 <div class="toast" id="toast"></div>
 
 <script>
 // ═══════════════════════════════════════════════════════
 //  ESTADO
 // ═══════════════════════════════════════════════════════
-const SENHA       = '16102018';
+// ⚠️ Senha removida do HTML — validação feita pelo servidor (Apps Script)
 const STORAGE_KEY = 'gastos_historico';
 
 let quemCartao   = 'allan';
@@ -617,47 +513,21 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 // ═══════════════════════════════════════════════════════
-//  🎨  SISTEMA DE TEMAS
+//  TEMAS SAZONAIS
 // ═══════════════════════════════════════════════════════
 const TEMAS = {
-  padrao: {
-    classe: '',
-    loginIcon: '🔐',
-    particles: []
-  },
-  junina: {
-    classe: 'tema-junina',
-    loginIcon: '🎪',
-    particles: ['🌽','⭐','🎇','🎆']
-  },
-  copa: {
-    classe: 'tema-copa',
-    loginIcon: '⚽',
-    particles: ['⚽','🌽','🇧🇷','⭐']
-  },
-  halloween: {
-    classe: 'tema-halloween',
-    loginIcon: '🎃',
-    particles: ['🦇','🕷️','🎃','🕸️']
-  },
-  natal: {
-    classe: 'tema-natal',
-    loginIcon: '🎄',
-    particles: ['❄️','⭐','🎄','✨']
-  }
+  padrao:    { classe: '',              loginIcon: '🔐', particles: [] },
+  junina:    { classe: 'tema-junina',   loginIcon: '🎪', particles: ['🌽','⭐','🎇','🎆'] },
+  copa:      { classe: 'tema-copa',     loginIcon: '⚽', particles: ['⚽','🌽','🇧🇷','⭐'] },
+  halloween: { classe: 'tema-halloween',loginIcon: '🎃', particles: ['🦇','🕷️','🎃','🕸️'] },
+  natal:     { classe: 'tema-natal',    loginIcon: '🎄', particles: ['❄️','⭐','🎄','🎅🏻'] }
 };
 
 function detectarTema() {
   const hoje = new Date();
-  const ano  = hoje.getFullYear();
-  const mes  = hoje.getMonth() + 1; // 1–12
-  const dia  = hoje.getDate();
-
-  // Natal: 15/Nov → 06/Jan
+  const ano = hoje.getFullYear(), mes = hoje.getMonth() + 1, dia = hoje.getDate();
   if ((mes === 11 && dia >= 15) || mes === 12 || (mes === 1 && dia <= 6)) return 'natal';
-  // Halloween: todo outubro
   if (mes === 10) return 'halloween';
-  // Junho e Julho
   if (mes === 6 || mes === 7) return ano === 2026 ? 'copa' : 'junina';
   return 'padrao';
 }
@@ -665,19 +535,11 @@ function detectarTema() {
 function aplicarTema() {
   const temaKey = detectarTema();
   const tema    = TEMAS[temaKey];
-
-  // Remove classes anteriores
   document.body.classList.remove('tema-junina','tema-copa','tema-halloween','tema-natal');
   if (tema.classe) document.body.classList.add(tema.classe);
-
-  // Ícone do login
   const loginIcon = document.getElementById('login-icon');
   if (loginIcon) loginIcon.textContent = tema.loginIcon;
-
-  // Partículas
   gerarParticulas(tema.particles, temaKey);
-
-  // Bandeirinhas
   gerarBandeirinhas(temaKey === 'junina' || temaKey === 'copa');
 }
 
@@ -685,28 +547,22 @@ function gerarParticulas(emojis, temaKey) {
   const container = document.getElementById('particles');
   container.innerHTML = '';
   if (!emojis || emojis.length === 0) return;
-
   container.style.display = 'block';
   const qtd = temaKey === 'halloween' ? 12 : 18;
-
   for (let i = 0; i < qtd; i++) {
     const p = document.createElement('div');
     p.className = 'particle';
     p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-    p.style.left             = Math.random() * 100 + 'vw';
+    p.style.left              = Math.random() * 100 + 'vw';
     p.style.animationDuration = (6 + Math.random() * 10) + 's';
-    p.style.animationDelay   = (Math.random() * 12) + 's';
-    p.style.fontSize         = (0.9 + Math.random() * 1.2) + 'rem';
+    p.style.animationDelay    = (Math.random() * 12) + 's';
+    p.style.fontSize          = (0.9 + Math.random() * 1.2) + 'rem';
     if (temaKey === 'halloween') p.style.opacity = '0.2';
     container.appendChild(p);
   }
 }
 
-const CORES_BANDEIRINHA = [
-  '#c0392b','#f39c12','#27ae60','#2980b9',
-  '#8e44ad','#e74c3c','#f1c40f','#1abc9c'
-];
-
+const CORES_BANDEIRINHA = ['#c0392b','#f39c12','#27ae60','#2980b9','#8e44ad','#e74c3c','#f1c40f','#1abc9c'];
 function gerarBandeirinhas(mostrar) {
   const el = document.getElementById('bandeirinhas-topo');
   el.innerHTML = '';
@@ -722,11 +578,8 @@ function gerarBandeirinhas(mostrar) {
 //  INIT
 // ═══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
-  // Aplica tema sazonal
   aplicarTema();
-
   const mesAtual = MESES[new Date().getMonth()];
-
   ['mes-cartao', 'mes-dinheiro'].forEach(function(id) {
     const sel = document.getElementById(id);
     MESES.forEach(function(m) {
@@ -736,29 +589,61 @@ document.addEventListener('DOMContentLoaded', function() {
       sel.appendChild(opt);
     });
   });
-
   if (lancamentos.length) renderHist();
 });
 
 // ═══════════════════════════════════════════════════════
-//  LOGIN
+//  LOGIN — validação via servidor
 // ═══════════════════════════════════════════════════════
 function tentarEntrar() {
   const input = document.getElementById('campo-senha');
   const erro  = document.getElementById('login-erro');
-  if (input.value === SENHA) {
-    erro.textContent = '';
-    const tela = document.getElementById('tela-login');
-    tela.classList.add('saindo');
-    setTimeout(() => tela.style.display = 'none', 360);
-  } else {
+  const btn   = document.getElementById('btn-entrar');
+  const senha = input.value;
+
+  if (!senha) {
     input.classList.add('err-field');
-    erro.textContent = 'Senha incorreta. Tente novamente.';
-    input.value = '';
+    erro.textContent = 'Digite a senha.';
     setTimeout(() => input.classList.remove('err-field'), 600);
-    input.focus();
+    return;
   }
+
+  // Estado de carregamento
+  btn.classList.add('verificando');
+  btn.textContent = '⏳ Verificando...';
+  erro.textContent = '';
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ acao: 'login', senha: senha })
+  })
+  .then(r => r.json())
+  .then(function(data) {
+    btn.classList.remove('verificando');
+    btn.textContent = 'Entrar';
+    if (data.status === 'ok') {
+      // Senha correta — entra no app
+      erro.textContent = '';
+      const tela = document.getElementById('tela-login');
+      tela.classList.add('saindo');
+      setTimeout(() => tela.style.display = 'none', 360);
+    } else {
+      // Senha incorreta
+      input.classList.add('err-field');
+      erro.textContent = 'Senha incorreta. Tente novamente.';
+      input.value = '';
+      setTimeout(() => input.classList.remove('err-field'), 600);
+      input.focus();
+    }
+  })
+  .catch(function() {
+    btn.classList.remove('verificando');
+    btn.textContent = 'Entrar';
+    erro.textContent = 'Erro de conexão. Verifique sua internet.';
+  });
 }
+
 function toggleVerSenha() {
   const i = document.getElementById('campo-senha');
   i.type = i.type === 'password' ? 'text' : 'password';
@@ -771,26 +656,22 @@ function mostrarView(id) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('visible'));
   document.getElementById('view-' + id).classList.add('visible');
 }
-
 function irParaCartao() {
   mostrarView('cartao');
   document.getElementById('topbar-titulo').textContent = 'Gasto no Cartão';
   document.getElementById('back-btn').classList.add('visible');
 }
-
 function irParaDinheiro() {
   mostrarView('dinheiro');
   document.getElementById('topbar-titulo').textContent = 'Gasto no Dinheiro';
   document.getElementById('back-btn').classList.add('visible');
   buscarSaldo();
 }
-
 function voltarMenu() {
   mostrarView('menu');
   document.getElementById('topbar-titulo').textContent = 'Controle de Gastos';
   document.getElementById('back-btn').classList.remove('visible');
 }
-
 function showPanel(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
   document.getElementById('panel-' + id).classList.add('visible');
@@ -818,13 +699,11 @@ function selectWho(who, el, contexto) {
 // ═══════════════════════════════════════════════════════
 function setupValorInput(inputId, getter, setter) {
   const el = document.getElementById(inputId);
-
   function fmt(c) {
     if (c === 0) return '';
     const s = String(c).padStart(3, '0');
     return 'R$ ' + s.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.') + ',' + s.slice(-2);
   }
-
   el.addEventListener('keydown', function(e) {
     if (e.key === 'Backspace') {
       setter(Math.floor(getter() / 10));
@@ -842,17 +721,14 @@ function setupValorInput(inputId, getter, setter) {
     this.value = fmt(getter());
   });
   el.addEventListener('focus', function() { this.classList.remove('err-field'); });
-
   return {
     getFloat: () => getter() / 100,
     reset: () => { setter(0); el.value = ''; }
   };
 }
 
-const valorCartao   = setupValorInput('valor-cartao',
-  () => centavosCartao,   v => centavosCartao = v);
-const valorDinheiro = setupValorInput('valor-dinheiro',
-  () => centavosDinheiro, v => centavosDinheiro = v);
+const valorCartao   = setupValorInput('valor-cartao',   () => centavosCartao,   v => centavosCartao = v);
+const valorDinheiro = setupValorInput('valor-dinheiro', () => centavosDinheiro, v => centavosDinheiro = v);
 
 // ═══════════════════════════════════════════════════════
 //  BUSCAR SALDO (doGet)
@@ -905,7 +781,6 @@ function buscarSaldo() {
 // ═══════════════════════════════════════════════════════
 function registrar(tipo) {
   const isCartao = tipo === 'cartao';
-
   const mes   = document.getElementById(isCartao ? 'mes-cartao'   : 'mes-dinheiro').value;
   const ano   = isCartao ? (document.getElementById('ano-cartao').value || '2026') : String(new Date().getFullYear());
   const desc  = document.getElementById(isCartao ? 'desc-cartao'  : 'desc-dinheiro').value.trim();
@@ -915,8 +790,7 @@ function registrar(tipo) {
 
   const descEl  = document.getElementById(isCartao ? 'desc-cartao'  : 'desc-dinheiro');
   const valorEl = document.getElementById(isCartao ? 'valor-cartao' : 'valor-dinheiro');
-  const btnId   = isCartao ? 'btn-cartao' : 'btn-dinheiro';
-  const btn     = document.getElementById(btnId);
+  const btn     = document.getElementById(isCartao ? 'btn-cartao'   : 'btn-dinheiro');
 
   descEl.classList.remove('err-field');
   valorEl.classList.remove('err-field');
@@ -950,12 +824,10 @@ function registrar(tipo) {
     btn.classList.remove('sending');
     btn.textContent = '✈ Registrar gasto';
     toast('✓ Gasto enviado!', 'ok');
-
     if (!isCartao && saldoAtual !== null) {
       saldoAtual -= valor;
       document.getElementById('saldo-valor').textContent = formatarMoeda(saldoAtual);
-      const card = document.getElementById('saldo-card');
-      card.className = 'saldo-card ' + (saldoAtual >= 0 ? 'positivo' : 'negativo');
+      document.getElementById('saldo-card').className = 'saldo-card ' + (saldoAtual >= 0 ? 'positivo' : 'negativo');
     }
   })
   .catch(function() {
@@ -1002,12 +874,10 @@ function renderHist() {
 function capitalizarPessoa(p) {
   return { allan: 'Allan', michel: 'Michel', michellan: 'Michellan' }[p] || p;
 }
-
 function formatarMoeda(v) {
   return 'R$ ' + Math.abs(v).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, '.')
     + (v < 0 ? ' (negativo)' : '');
 }
-
 function detectarDispositivo() {
   const ua = navigator.userAgent || '';
   const standalone = window.navigator.standalone;
@@ -1016,7 +886,6 @@ function detectarDispositivo() {
   if (/Android/i.test(ua)) return isAndroidApp ? 'Android (App)' : 'Android (Navegador)';
   return 'Web Desktop';
 }
-
 function toast(msg, tipo = 'ok') {
   const t = document.getElementById('toast');
   t.textContent = msg;
