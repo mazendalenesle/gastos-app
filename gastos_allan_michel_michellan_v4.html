@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -14,7 +13,6 @@
   <title>Controle de Gastos</title>
 
   <script>
-    // ⚠️ SUBSTITUA pela URL do seu Web App após publicar o Apps Script
     const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzhcG-5BYNlKySkmfTI-P4_pPecqKb-VphJtW9-PxyB7gbUt2kYHXFxJLpctectJ_-9/exec';
 
     function makeIcon(size) {
@@ -39,9 +37,14 @@
 
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ══════════════════════════════════════
+       TEMA PADRÃO — Controle de Gastos
+    ══════════════════════════════════════ */
     :root {
       --brand: #80cee1;
       --brand-dark: #3a9ab5;
+      --topbar-text: #1a4f5e;
       --red-light: #FDECEA; --red-deep: #C0392B; --red-sel: #f5b8b5;
       --blue-light: #E8F0FE; --blue-deep: #2563A8; --blue-sel: #b5cef7;
       --pink-light: #FDE8F0; --pink-deep: #A0305A; --pink-sel: #f5b0cc;
@@ -54,46 +57,151 @@
       --text-muted: #6b7280;
       --radius-md: 10px;
       --radius-lg: 16px;
+      /* partículas: off por padrão */
+      --particles-display: none;
     }
 
+    /* ══════════════════════════════════════
+       TEMA: COPA + JUNINA (Jun/Jul 2026)
+    ══════════════════════════════════════ */
+    body.tema-copa {
+      --brand: #f39c12;
+      --brand-dark: #c0392b;
+      --topbar-text: #4a1c00;
+      --bg: #fff8f0;
+      --surface: #fffaf4;
+      --border: #f5c97a;
+      --text: #4a1c00;
+      --text-muted: #8c5a00;
+      --green-btn: #f5c97a;
+      --green-btn-text: #7d3c00;
+    }
+
+    /* ══════════════════════════════════════
+       TEMA: FESTA JUNINA (Jun/Jul, outros anos)
+    ══════════════════════════════════════ */
+    body.tema-junina {
+      --brand: #f39c12;
+      --brand-dark: #c0392b;
+      --topbar-text: #4a1c00;
+      --bg: #fff8f0;
+      --surface: #fffaf4;
+      --border: #f5c97a;
+      --text: #4a1c00;
+      --text-muted: #8c5a00;
+      --green-btn: #f5c97a;
+      --green-btn-text: #7d3c00;
+    }
+
+    /* ══════════════════════════════════════
+       TEMA: HALLOWEEN (Outubro)
+    ══════════════════════════════════════ */
+    body.tema-halloween {
+      --brand: #e67e00;
+      --brand-dark: #b35c00;
+      --topbar-text: #fff3e0;
+      --bg: #120500;
+      --surface: #1a0a00;
+      --border: #5a2d00;
+      --text: #ffb347;
+      --text-muted: #c07020;
+      --green-btn: #6c0f7a;
+      --green-btn-text: #f0a0ff;
+    }
+
+    /* ══════════════════════════════════════
+       TEMA: NATAL (15/Nov → 06/Jan)
+    ══════════════════════════════════════ */
+    body.tema-natal {
+      --brand: #1a7a2e;
+      --brand-dark: #c8001c;
+      --topbar-text: #ffffff;
+      --bg: #f0faf2;
+      --surface: #ffffff;
+      --border: #a0d4a8;
+      --text: #1a2e1c;
+      --text-muted: #4a6b50;
+      --green-btn: #c8001c;
+      --green-btn-text: #ffffff;
+    }
+
+    /* ══════════════════════════════════════
+       PARTÍCULAS ANIMADAS
+    ══════════════════════════════════════ */
+    .particles {
+      position: fixed; inset: 0; pointer-events: none;
+      overflow: hidden; z-index: 0;
+      display: var(--particles-display, none);
+    }
+    .particle {
+      position: absolute; top: -40px;
+      animation: fall linear infinite; opacity: 0.55;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* ══════════════════════════════════════
+       BANDEIRINHAS (Junina / Copa)
+    ══════════════════════════════════════ */
+    .bandeirinha-topo {
+      display: none;
+      position: fixed; top: 0; left: 0; right: 0;
+      justify-content: space-around; padding: 0 4px;
+      z-index: 10; pointer-events: none;
+    }
+    body.tema-junina .bandeirinha-topo,
+    body.tema-copa   .bandeirinha-topo { display: flex; }
+    .bandeirinha-topo span {
+      display: inline-block; width: 20px; height: 28px;
+      clip-path: polygon(0 0, 100% 0, 100% 75%, 50% 100%, 0 75%); opacity: 0.9;
+    }
+
+
+
+    /* ══════════════════════════════════════
+       LAYOUT BASE
+    ══════════════════════════════════════ */
     body {
       background: var(--bg);
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
       min-height: 100vh;
       display: flex; align-items: flex-start; justify-content: center;
       padding: 1rem;
+      transition: background 0.5s, color 0.5s;
     }
 
-    /* ── Tela base ── */
     .screen {
+      position: relative; z-index: 1;
       background: var(--surface);
       border-radius: var(--radius-lg);
       border: 0.5px solid var(--border);
       width: 100%; max-width: 400px;
       overflow: hidden;
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      transition: background 0.5s, border-color 0.5s;
     }
 
     .topbar {
       background: var(--brand);
       padding: 1rem 1.25rem;
       display: flex; align-items: center; gap: 10px;
+      transition: background 0.5s;
     }
     .topbar svg { flex-shrink: 0; }
-    .topbar h1 { color: #1a4f5e; font-size: 16px; font-weight: 600; flex: 1; }
+    .topbar h1 { color: var(--topbar-text); font-size: 16px; font-weight: 600; flex: 1; transition: color 0.5s; }
     .topbar .back-btn {
       background: none; border: none; cursor: pointer;
-      color: #1a4f5e; font-size: 22px; padding: 2px 4px;
+      color: var(--topbar-text); font-size: 22px; padding: 2px 4px;
       display: none; align-items: center;
     }
     .topbar .back-btn.visible { display: flex; }
 
-    /* ── Telas (views) ── */
     .view { display: none; }
     .view.visible { display: block; }
 
     /* ══════════════════════════════════════
-       VIEW: MENU PRINCIPAL
+       VIEW: MENU
     ══════════════════════════════════════ */
     .menu-area { padding: 1.5rem 1.25rem; }
     .menu-titulo {
@@ -109,17 +217,15 @@
       display: flex; align-items: center; gap: 14px;
       transition: all 0.18s; text-align: left;
     }
-    .menu-btn:hover { border-color: var(--brand-dark); background: #f0fafc; }
+    .menu-btn:hover { border-color: var(--brand-dark); background: var(--bg); }
     .menu-btn .menu-icon { font-size: 28px; flex-shrink: 0; }
     .menu-btn .menu-text { flex: 1; }
     .menu-btn .menu-text strong { display: block; font-size: 14px; font-weight: 600; color: var(--text); }
     .menu-btn .menu-text span { display: block; font-size: 12px; color: var(--text-muted); margin-top: 2px; }
     .menu-btn .arrow { color: var(--text-muted); font-size: 16px; }
-    .menu-btn.cartao:hover { border-color: var(--brand-dark); }
-    .menu-btn.dinheiro:hover { border-color: #d97706; background: #fffbf0; }
 
     /* ══════════════════════════════════════
-       VIEW: CARTÃO — igual ao v1.4
+       TABS E PANELS
     ══════════════════════════════════════ */
     .tabs { display: flex; border-bottom: 1px solid var(--border); }
     .tab {
@@ -132,6 +238,9 @@
     .panel { display: none; }
     .panel.visible { display: block; }
 
+    /* ══════════════════════════════════════
+       FORMULÁRIO
+    ══════════════════════════════════════ */
     .form-area { padding: 1rem 1.25rem; }
     .who-label { font-size: 12px; color: var(--text-muted); margin-bottom: 8px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.04em; }
     .who-btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 16px; }
@@ -178,11 +287,13 @@
     .btn-reg.sending { opacity: 0.55; pointer-events: none; }
     .btn-reg.erro-envio { background: #FDECEA; color: var(--red-deep); }
 
-    /* Histórico */
+    /* ══════════════════════════════════════
+       HISTÓRICO
+    ══════════════════════════════════════ */
     .hist-area { padding: 0.75rem 0 0; }
     .hist-header {
       display: grid; grid-template-columns: 1.4fr 1.8fr 1.2fr 1.1fr; gap: 4px;
-      padding: 6px 1.25rem; background: #f8f9fa;
+      padding: 6px 1.25rem; background: var(--bg);
       border-bottom: 1px solid var(--border);
       font-size: 11px; font-weight: 600; color: var(--text-muted);
       text-transform: uppercase; letter-spacing: 0.04em;
@@ -192,6 +303,7 @@
       display: grid; grid-template-columns: 1.4fr 1.8fr 1.2fr 1.1fr; gap: 4px;
       padding: 9px 1.25rem; border-bottom: 1px solid var(--border);
       font-size: 13px; align-items: center; animation: pop 0.2s ease;
+      color: var(--text);
     }
     .entry-row:last-child { border-bottom: none; }
     .entry-row .lbl-mes { color: var(--text-muted); font-size: 11px; }
@@ -207,7 +319,8 @@
     .total-bar {
       display: flex; justify-content: space-between;
       padding: 10px 1.25rem; border-top: 1px solid var(--border);
-      font-size: 13px; font-weight: 600; background: #f8f9fa;
+      font-size: 13px; font-weight: 600; background: var(--bg);
+      color: var(--text);
     }
     .total-bar span:last-child { color: var(--green-btn-text); }
 
@@ -215,7 +328,6 @@
        VIEW: DINHEIRO
     ══════════════════════════════════════ */
     .din-setup { padding: 1.25rem; }
-    .din-setup .who-btns { grid-template-columns: 1fr 1fr; }
 
     .saldo-card {
       margin: 0 1.25rem 1rem;
@@ -227,7 +339,7 @@
     }
     .saldo-card.positivo { border-color: #86efac; background: #f0fdf4; }
     .saldo-card.negativo { border-color: #fca5a5; background: #fef2f2; }
-    .saldo-card.carregando { border-color: var(--border); background: #f8f9fa; }
+    .saldo-card.carregando { border-color: var(--border); background: var(--bg); }
     .saldo-label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
     .saldo-valor { font-size: 20px; font-weight: 700; color: var(--text); }
     .saldo-card.positivo .saldo-valor { color: #15803d; }
@@ -237,7 +349,9 @@
 
     .din-form { padding: 0 1.25rem 1.25rem; }
 
-    /* Toast */
+    /* ══════════════════════════════════════
+       TOAST
+    ══════════════════════════════════════ */
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
       padding: 10px 20px; border-radius: 24px;
@@ -252,7 +366,9 @@
     @keyframes pop { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
     .err-field { border-color: var(--red-deep) !important; }
 
-    /* ── Tela de login ── */
+    /* ══════════════════════════════════════
+       TELA DE LOGIN
+    ══════════════════════════════════════ */
     #tela-login {
       position: fixed; inset: 0; z-index: 200;
       background: var(--bg);
@@ -266,10 +382,10 @@
       box-shadow: 0 4px 24px rgba(0,0,0,0.08);
       width: 100%; max-width: 340px; overflow: hidden;
     }
-    .login-header { background: var(--brand); padding: 2rem 1.5rem 1.5rem; text-align: center; }
+    .login-header { background: var(--brand); padding: 2rem 1.5rem 1.5rem; text-align: center; transition: background 0.5s; }
     .login-header .lock-icon { font-size: 36px; display: block; margin-bottom: 8px; }
-    .login-header h2 { color: #1a4f5e; font-size: 17px; font-weight: 600; margin: 0; }
-    .login-header p { color: #2a6f82; font-size: 13px; margin-top: 4px; }
+    .login-header h2 { color: var(--topbar-text); font-size: 17px; font-weight: 600; margin: 0; transition: color 0.5s; }
+    .login-header p { color: var(--topbar-text); opacity: 0.75; font-size: 13px; margin-top: 4px; }
     .login-body { padding: 1.5rem; }
     .login-body label {
       font-size: 12px; color: var(--text-muted); font-weight: 500;
@@ -294,7 +410,7 @@
       width: 100%; padding: 12px; margin-top: 16px;
       border: none; border-radius: var(--radius-md);
       font-size: 14px; font-weight: 600; font-family: inherit;
-      cursor: pointer; background: var(--brand-dark); color: #fff;
+      cursor: pointer; background: var(--brand-dark); color: var(--topbar-text);
       transition: opacity 0.15s, transform 0.1s;
     }
     .btn-entrar:hover { opacity: 0.88; }
@@ -308,11 +424,17 @@
 </head>
 <body>
 
+<!-- Bandeirinhas (Junina / Copa) -->
+<div class="bandeirinha-topo" id="bandeirinhas-topo"></div>
+
+<!-- Partículas decorativas -->
+<div class="particles" id="particles"></div>
+
 <!-- ══ TELA DE LOGIN ══ -->
 <div id="tela-login">
   <div class="login-card">
     <div class="login-header">
-      <span class="lock-icon">🔐</span>
+      <span class="lock-icon" id="login-icon">🔐</span>
       <h2>Controle de Gastos</h2>
       <p>Digite a senha para entrar</p>
     </div>
@@ -334,10 +456,10 @@
 <div class="screen">
   <div class="topbar">
     <button class="back-btn" id="back-btn" onclick="voltarMenu()" aria-label="Voltar">&#8592;</button>
-    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#1a4f5e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color:var(--topbar-text)">
       <path d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
       <path d="M16 3H8L6 7h12l-2-4z"/>
-      <circle cx="17" cy="13" r="1" fill="#1a4f5e"/>
+      <circle cx="17" cy="13" r="1" fill="currentColor"/>
     </svg>
     <h1 id="topbar-titulo">Controle de Gastos</h1>
   </div>
@@ -433,7 +555,6 @@
   <!-- ════ VIEW: DINHEIRO ════ -->
   <div class="view" id="view-dinheiro">
 
-    <!-- Seleção de quem + mês -->
     <div class="din-setup" id="din-setup">
       <div class="who-label">Quem está gastando?</div>
       <div class="who-btns" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">
@@ -450,7 +571,6 @@
       </div>
     </div>
 
-    <!-- Card de saldo -->
     <div class="saldo-card carregando" id="saldo-card">
       <div>
         <div class="saldo-label" id="saldo-label">Buscando saldo...</div>
@@ -459,7 +579,6 @@
       <span class="saldo-spinner" id="saldo-spinner">⏳</span>
     </div>
 
-    <!-- Formulário de gasto -->
     <div class="din-form">
       <div class="form-row">
         <label>Descrição do gasto</label>
@@ -490,7 +609,7 @@ let quemCartao   = 'allan';
 let quemDinheiro = 'allan';
 let centavosCartao   = 0;
 let centavosDinheiro = 0;
-let saldoAtual = null; // valor numérico lido da planilha
+let saldoAtual = null;
 
 const lancamentos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
@@ -498,12 +617,116 @@ const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
 
 // ═══════════════════════════════════════════════════════
+//  🎨  SISTEMA DE TEMAS
+// ═══════════════════════════════════════════════════════
+const TEMAS = {
+  padrao: {
+    classe: '',
+    loginIcon: '🔐',
+    particles: []
+  },
+  junina: {
+    classe: 'tema-junina',
+    loginIcon: '🎪',
+    particles: ['🌽','⭐','🎇','🎆']
+  },
+  copa: {
+    classe: 'tema-copa',
+    loginIcon: '⚽',
+    particles: ['⚽','🌽','🇧🇷','⭐']
+  },
+  halloween: {
+    classe: 'tema-halloween',
+    loginIcon: '🎃',
+    particles: ['🦇','🕷️','🎃','🕸️']
+  },
+  natal: {
+    classe: 'tema-natal',
+    loginIcon: '🎄',
+    particles: ['❄️','⭐','🎄','✨']
+  }
+};
+
+function detectarTema() {
+  const hoje = new Date();
+  const ano  = hoje.getFullYear();
+  const mes  = hoje.getMonth() + 1; // 1–12
+  const dia  = hoje.getDate();
+
+  // Natal: 15/Nov → 06/Jan
+  if ((mes === 11 && dia >= 15) || mes === 12 || (mes === 1 && dia <= 6)) return 'natal';
+  // Halloween: todo outubro
+  if (mes === 10) return 'halloween';
+  // Junho e Julho
+  if (mes === 6 || mes === 7) return ano === 2026 ? 'copa' : 'junina';
+  return 'padrao';
+}
+
+function aplicarTema() {
+  const temaKey = detectarTema();
+  const tema    = TEMAS[temaKey];
+
+  // Remove classes anteriores
+  document.body.classList.remove('tema-junina','tema-copa','tema-halloween','tema-natal');
+  if (tema.classe) document.body.classList.add(tema.classe);
+
+  // Ícone do login
+  const loginIcon = document.getElementById('login-icon');
+  if (loginIcon) loginIcon.textContent = tema.loginIcon;
+
+  // Partículas
+  gerarParticulas(tema.particles, temaKey);
+
+  // Bandeirinhas
+  gerarBandeirinhas(temaKey === 'junina' || temaKey === 'copa');
+}
+
+function gerarParticulas(emojis, temaKey) {
+  const container = document.getElementById('particles');
+  container.innerHTML = '';
+  if (!emojis || emojis.length === 0) return;
+
+  container.style.display = 'block';
+  const qtd = temaKey === 'halloween' ? 12 : 18;
+
+  for (let i = 0; i < qtd; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+    p.style.left             = Math.random() * 100 + 'vw';
+    p.style.animationDuration = (6 + Math.random() * 10) + 's';
+    p.style.animationDelay   = (Math.random() * 12) + 's';
+    p.style.fontSize         = (0.9 + Math.random() * 1.2) + 'rem';
+    if (temaKey === 'halloween') p.style.opacity = '0.2';
+    container.appendChild(p);
+  }
+}
+
+const CORES_BANDEIRINHA = [
+  '#c0392b','#f39c12','#27ae60','#2980b9',
+  '#8e44ad','#e74c3c','#f1c40f','#1abc9c'
+];
+
+function gerarBandeirinhas(mostrar) {
+  const el = document.getElementById('bandeirinhas-topo');
+  el.innerHTML = '';
+  if (!mostrar) return;
+  for (let i = 0; i < 20; i++) {
+    const s = document.createElement('span');
+    s.style.background = CORES_BANDEIRINHA[i % CORES_BANDEIRINHA.length];
+    el.appendChild(s);
+  }
+}
+
+// ═══════════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', function() {
+  // Aplica tema sazonal
+  aplicarTema();
+
   const mesAtual = MESES[new Date().getMonth()];
 
-  // Preenche selects de mês
   ['mes-cartao', 'mes-dinheiro'].forEach(function(id) {
     const sel = document.getElementById(id);
     MESES.forEach(function(m) {
@@ -728,7 +951,6 @@ function registrar(tipo) {
     btn.textContent = '✈ Registrar gasto';
     toast('✓ Gasto enviado!', 'ok');
 
-    // Atualiza saldo local subtraindo o valor
     if (!isCartao && saldoAtual !== null) {
       saldoAtual -= valor;
       document.getElementById('saldo-valor').textContent = formatarMoeda(saldoAtual);
