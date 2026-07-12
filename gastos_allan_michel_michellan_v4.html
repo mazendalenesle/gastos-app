@@ -13,7 +13,7 @@
   <title>Controle de Gastos</title>
 
   <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwgHC7M-YzvVheszwvTHXrL6_FY6386McXPG4fOkX6NcVj1pJdrgorfVVbWZEvtJeV8/exec';
+    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzDLEsAJKkVFH2SUNeMqDcAQwUjrmVwGUKNDetdJNZ4fr-h_SKWTS_zfbeXPGbZwPur/exec';
 
     function makeIcon(size) {
       const c = document.createElement('canvas');
@@ -384,10 +384,10 @@
           <span class="arrow">›</span>
         </button>
         <button class="menu-btn dinheiro" onclick="irParaDinheiro()">
-          <span class="menu-icon">💵</span>
+          <span class="menu-icon">📊</span>
           <span class="menu-text">
-            <strong>Gasto no Dinheiro</strong>
-            <span>Ver saldo e registrar gasto em espécie</span>
+            <strong>Verificar Budget Mensal</strong>
+            <span>Ver saldo disponível por mês e pessoa</span>
           </span>
           <span class="arrow">›</span>
         </button>
@@ -454,10 +454,10 @@
     </div>
   </div>
 
-  <!-- ════ VIEW: DINHEIRO ════ -->
+  <!-- ════ VIEW: VERIFICAR BUDGET MENSAL ════ -->
   <div class="view" id="view-dinheiro">
     <div class="din-setup" id="din-setup">
-      <div class="who-label">Quem está gastando?</div>
+      <div class="who-label">Verificar budget de quem?</div>
       <div class="who-btns" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">
         <button class="who-btn allan sel" id="din-btn-allan" onclick="selectWho('allan', this, 'dinheiro')">
           <span class="check">✓</span><span class="emoji">👨🏻‍🦱</span>Allan
@@ -473,21 +473,10 @@
     </div>
     <div class="saldo-card carregando" id="saldo-card">
       <div>
-        <div class="saldo-label" id="saldo-label">Buscando saldo...</div>
+        <div class="saldo-label" id="saldo-label">Buscando budget...</div>
         <div class="saldo-valor" id="saldo-valor">—</div>
       </div>
       <span class="saldo-spinner" id="saldo-spinner">⏳</span>
-    </div>
-    <div class="din-form">
-      <div class="form-row">
-        <label>Descrição do gasto</label>
-        <input type="text" id="desc-dinheiro" placeholder="Ex: Padaria, Uber...">
-      </div>
-      <div class="form-row">
-        <label>Valor (R$)</label>
-        <input type="text" id="valor-dinheiro" inputmode="numeric" placeholder="R$ 0,00" autocomplete="off">
-      </div>
-      <button class="btn-reg" id="btn-dinheiro" onclick="registrar('dinheiro')">✈ Registrar gasto</button>
     </div>
   </div>
 
@@ -499,15 +488,12 @@
 //  ESTADO
 // ═══════════════════════════════════════════════════════
 // ⚠️ Senha removida do HTML — validação feita pelo servidor (Apps Script)
-const STORAGE_KEY = 'gastos_historico';
 
 let quemCartao   = 'allan';
 let quemDinheiro = 'allan';
 let centavosCartao   = 0;
 let centavosDinheiro = 0;
 let saldoAtual = null;
-
-const lancamentos = JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -589,7 +575,6 @@ document.addEventListener('DOMContentLoaded', function() {
       sel.appendChild(opt);
     });
   });
-  if (lancamentos.length) renderHist();
 });
 
 // ═══════════════════════════════════════════════════════
@@ -661,7 +646,7 @@ function irParaCartao() {
 }
 function irParaDinheiro() {
   mostrarView('dinheiro');
-  document.getElementById('topbar-titulo').textContent = 'Gasto no Dinheiro';
+  document.getElementById('topbar-titulo').textContent = 'Verificar Budget Mensal';
   document.getElementById('back-btn').classList.add('visible');
   buscarSaldo();
 }
@@ -675,6 +660,7 @@ function showPanel(id, btn) {
   document.getElementById('panel-' + id).classList.add('visible');
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   btn.classList.add('active');
+  if (id === 'hist') buscarHistorico();
 }
 
 // ═══════════════════════════════════════════════════════
@@ -726,7 +712,6 @@ function setupValorInput(inputId, getter, setter) {
 }
 
 const valorCartao   = setupValorInput('valor-cartao',   () => centavosCartao,   v => centavosCartao = v);
-const valorDinheiro = setupValorInput('valor-dinheiro', () => centavosDinheiro, v => centavosDinheiro = v);
 
 // ═══════════════════════════════════════════════════════
 //  BUSCAR SALDO (doGet)
@@ -757,7 +742,7 @@ function buscarSaldo() {
       spinner.style.display = 'none';
       if (data.status === 'ok') {
         saldoAtual = parseFloat(data.saldo) || 0;
-        label.textContent = 'Saldo disponível em ' + mes;
+        label.textContent = 'Budget disponível em ' + mes;
         valor.textContent = formatarMoeda(saldoAtual);
         card.className = 'saldo-card ' + (saldoAtual >= 0 ? 'positivo' : 'negativo');
       } else {
@@ -814,9 +799,6 @@ function registrar(tipo) {
     body: JSON.stringify(payload)
   })
   .then(function() {
-    lancamentos.unshift({ mes, ano, desc, valor, quem, tipo: payload.tipo });
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(lancamentos));
-    renderHist();
     descEl.value = '';
     vCtrl.reset();
     btn.classList.remove('sending');
@@ -841,27 +823,50 @@ function registrar(tipo) {
 }
 
 // ═══════════════════════════════════════════════════════
-//  HISTÓRICO
+//  HISTÓRICO — lê os últimos 15 lançamentos da planilha
 // ═══════════════════════════════════════════════════════
-function renderHist() {
+function buscarHistorico() {
   const body = document.getElementById('hist-body');
-  if (!lancamentos.length) {
+  body.innerHTML = '<div class="empty">Carregando...</div>';
+  document.getElementById('total-bar').style.display = 'none';
+
+  const url = APPS_SCRIPT_URL + '?acao=historico&limite=15';
+
+  fetch(url)
+    .then(r => r.json())
+    .then(function(data) {
+      if (data.status === 'ok') {
+        renderHist(data.dados || []);
+      } else {
+        body.innerHTML = '<div class="empty">' + (data.mensagem || 'Erro ao carregar') + '</div>';
+      }
+    })
+    .catch(function() {
+      body.innerHTML = '<div class="empty">Erro de conexão</div>';
+    });
+}
+
+function renderHist(lista) {
+  const body = document.getElementById('hist-body');
+  if (!lista.length) {
     body.innerHTML = '<div class="empty">Nenhum lançamento ainda</div>';
     document.getElementById('total-bar').style.display = 'none';
     return;
   }
-  body.innerHTML = lancamentos.map(function(l) {
+  body.innerHTML = lista.map(function(l) {
+    const quem   = String(l.pessoa || '').toLowerCase();
+    const valor  = parseFloat(l.valor) || 0;
     const tipoTag = l.tipo === 'Dinheiro'
       ? '<span style="font-size:10px;background:#FFF8E1;color:#B45309;padding:1px 5px;border-radius:8px;margin-left:3px;">💵</span>'
       : '';
     return `<div class="entry-row">
       <span class="lbl-mes">${l.mes} ${l.ano}</span>
       <span>${l.desc}${tipoTag}</span>
-      <span class="val">R$ ${l.valor.toFixed(2).replace('.', ',')}</span>
-      <span style="text-align:center"><span class="badge ${l.quem}">${capitalizarPessoa(l.quem)}</span></span>
+      <span class="val">R$ ${valor.toFixed(2).replace('.', ',')}</span>
+      <span style="text-align:center"><span class="badge ${quem}">${capitalizarPessoa(quem)}</span></span>
     </div>`;
   }).join('');
-  const total = lancamentos.reduce((s, l) => s + l.valor, 0);
+  const total = lista.reduce((s, l) => s + (parseFloat(l.valor) || 0), 0);
   document.getElementById('total-val').textContent = 'R$ ' + total.toFixed(2).replace('.', ',');
   document.getElementById('total-bar').style.display = 'flex';
 }
