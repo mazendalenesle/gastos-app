@@ -458,12 +458,15 @@
   <div class="view" id="view-dinheiro">
     <div class="din-setup" id="din-setup">
       <div class="who-label">Verificar budget de quem?</div>
-      <div class="who-btns" style="grid-template-columns:1fr 1fr; margin-bottom:14px;">
+      <div class="who-btns" style="margin-bottom:14px;">
         <button class="who-btn allan sel" id="din-btn-allan" onclick="selectWho('allan', this, 'dinheiro')">
           <span class="check">✓</span><span class="emoji">👨🏻‍🦱</span>Allan
         </button>
         <button class="who-btn michel" id="din-btn-michel" onclick="selectWho('michel', this, 'dinheiro')">
           <span class="check">✓</span><span class="emoji">👨🏽‍🦱</span>Michel
+        </button>
+        <button class="who-btn michellan" id="din-btn-michellan" onclick="selectWho('michellan', this, 'dinheiro')">
+          <span class="check">✓</span><span class="emoji">🩷</span>Michellan
         </button>
       </div>
       <div class="form-row">
@@ -727,14 +730,48 @@ function buscarSaldo() {
   const spinner = document.getElementById('saldo-spinner');
 
   card.className = 'saldo-card carregando';
-  label.textContent = 'Buscando saldo...';
+  label.textContent = 'Buscando budget...';
   valor.textContent = '—';
   spinner.style.display = 'block';
   saldoAtual = null;
 
-  const url = APPS_SCRIPT_URL
-    + '?pessoa=' + encodeURIComponent(capitalizarPessoa(pessoa))
-    + '&mes='    + encodeURIComponent(mes);
+  function urlPessoa(p) {
+    return APPS_SCRIPT_URL
+      + '?pessoa=' + encodeURIComponent(capitalizarPessoa(p))
+      + '&mes='    + encodeURIComponent(mes);
+  }
+
+  // ── Michellan: soma o budget de Allan + Michel ──────────
+  if (pessoa === 'michellan') {
+    Promise.all([
+      fetch(urlPessoa('allan')).then(r => r.json()),
+      fetch(urlPessoa('michel')).then(r => r.json())
+    ])
+      .then(function(resultados) {
+        const dataAllan  = resultados[0];
+        const dataMichel = resultados[1];
+        spinner.style.display = 'none';
+        if (dataAllan.status === 'ok' && dataMichel.status === 'ok') {
+          saldoAtual = (parseFloat(dataAllan.saldo) || 0) + (parseFloat(dataMichel.saldo) || 0);
+          label.textContent = 'Budget disponível (Allan + Michel) em ' + mes;
+          valor.textContent = formatarMoeda(saldoAtual);
+          card.className = 'saldo-card ' + (saldoAtual >= 0 ? 'positivo' : 'negativo');
+        } else {
+          label.textContent = 'Não foi possível carregar';
+          valor.textContent = dataAllan.mensagem || dataMichel.mensagem || 'Erro';
+          card.className = 'saldo-card negativo';
+        }
+      })
+      .catch(function() {
+        spinner.style.display = 'none';
+        label.textContent = 'Erro de conexão';
+        valor.textContent = 'Tente novamente';
+        card.className = 'saldo-card negativo';
+      });
+    return;
+  }
+
+  const url = urlPessoa(pessoa);
 
   fetch(url)
     .then(r => r.json())
