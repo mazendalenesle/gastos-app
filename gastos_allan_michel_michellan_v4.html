@@ -265,6 +265,47 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .din-form { padding: 0 1.25rem 1.25rem; }
 
+    /* ── Lista de Compras compartilhada ── */
+    .lista-body { padding: 0 0 0.5rem; max-height: 50vh; overflow-y: auto; }
+    .lista-item {
+      display: flex; align-items: center; gap: 10px;
+      padding: 10px 1.25rem; border-bottom: 1px solid var(--border);
+      animation: pop 0.2s ease; transition: opacity 0.25s;
+    }
+    .lista-item:last-child { border-bottom: none; }
+    .lista-item.comprado { opacity: 0.35; }
+    .lista-item.comprado .lista-texto { text-decoration: line-through; }
+    .lista-check {
+      width: 22px; height: 22px; flex-shrink: 0;
+      border-radius: 50%; border: 2px solid var(--brand-dark);
+      background: transparent; cursor: pointer; padding: 0;
+      position: relative; transition: background 0.15s, border-color 0.15s;
+    }
+    .lista-check:active { transform: scale(0.9); }
+    .lista-item.comprado .lista-check { background: var(--brand-dark); }
+    .lista-item.comprado .lista-check::after {
+      content: '✓'; position: absolute; inset: 0;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 12px; font-weight: 700;
+    }
+    .lista-texto { font-size: 14px; color: var(--text); flex: 1; word-break: break-word; }
+    .lista-add-row { display: flex; gap: 8px; padding: 0.25rem 1.25rem 0.75rem; }
+    .lista-add-row input {
+      flex: 1; padding: 10px 12px; font-size: 14px;
+      border: 1px solid var(--border); border-radius: var(--radius-md);
+      background: var(--surface); color: var(--text); font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .lista-add-row input:focus { outline: none; border-color: var(--brand-dark); }
+    .lista-add-row button {
+      width: 46px; flex-shrink: 0; border: none; border-radius: var(--radius-md);
+      background: var(--green-btn); color: var(--green-btn-text);
+      font-size: 20px; font-weight: 700; cursor: pointer; font-family: inherit;
+      transition: opacity 0.15s, transform 0.1s;
+    }
+    .lista-add-row button:active { transform: scale(0.95); }
+    .lista-add-row button:disabled { opacity: 0.5; pointer-events: none; }
+
     .toast {
       position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
       padding: 10px 20px; border-radius: 24px;
@@ -391,6 +432,14 @@
           </span>
           <span class="arrow">›</span>
         </button>
+        <button class="menu-btn lista" onclick="irParaLista()">
+          <span class="menu-icon">🛒</span>
+          <span class="menu-text">
+            <strong>Lista de Compras</strong>
+            <span>Adicionar itens em tempo real, juntos no mercado</span>
+          </span>
+          <span class="arrow">›</span>
+        </button>
       </div>
     </div>
   </div>
@@ -483,6 +532,24 @@
     </div>
   </div>
 
+  <!-- ════ VIEW: LISTA DE COMPRAS ════ -->
+  <div class="view" id="view-lista">
+    <div class="form-area" style="padding-bottom: 0;">
+      <div class="form-row" style="margin-bottom: 10px;">
+        <label>Mês da lista</label>
+        <select id="mes-lista" onchange="listaPrimeiraCarga = true; carregarLista();"></select>
+      </div>
+    </div>
+    <div class="lista-add-row">
+      <input type="text" id="novo-item-lista" placeholder="Ex: Leite, Pão, Detergente..." autocomplete="off"
+             onkeydown="if(event.key==='Enter') adicionarItemLista()">
+      <button id="btn-add-lista" onclick="adicionarItemLista()" aria-label="Adicionar item">+</button>
+    </div>
+    <div class="lista-body" id="lista-body">
+      <div class="empty">Carregando...</div>
+    </div>
+  </div>
+
 </div><!-- /.screen -->
 <div class="toast" id="toast"></div>
 
@@ -497,6 +564,9 @@ let quemDinheiro = 'allan';
 let centavosCartao   = 0;
 let centavosDinheiro = 0;
 let saldoAtual = null;
+
+let intervaloLista       = null;
+let listaPrimeiraCarga   = true;
 
 const MESES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
                'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
@@ -569,7 +639,7 @@ function gerarBandeirinhas(mostrar) {
 document.addEventListener('DOMContentLoaded', function() {
   aplicarTema();
   const mesAtual = MESES[new Date().getMonth()];
-  ['mes-cartao', 'mes-dinheiro'].forEach(function(id) {
+  ['mes-cartao', 'mes-dinheiro', 'mes-lista'].forEach(function(id) {
     const sel = document.getElementById(id);
     MESES.forEach(function(m) {
       const opt = document.createElement('option');
@@ -653,10 +723,21 @@ function irParaDinheiro() {
   document.getElementById('back-btn').classList.add('visible');
   buscarSaldo();
 }
+function irParaLista() {
+  mostrarView('lista');
+  document.getElementById('topbar-titulo').textContent = 'Lista de Compras';
+  document.getElementById('back-btn').classList.add('visible');
+  listaPrimeiraCarga = true;
+  carregarLista();
+  if (intervaloLista) clearInterval(intervaloLista);
+  // Atualiza sozinha a cada 4s pra pegar itens que o outro adicionou no mercado
+  intervaloLista = setInterval(carregarLista, 4000);
+}
 function voltarMenu() {
   mostrarView('menu');
   document.getElementById('topbar-titulo').textContent = 'Controle de Gastos';
   document.getElementById('back-btn').classList.remove('visible');
+  if (intervaloLista) { clearInterval(intervaloLista); intervaloLista = null; }
 }
 function showPanel(id, btn) {
   document.querySelectorAll('.panel').forEach(p => p.classList.remove('visible'));
@@ -909,6 +990,123 @@ function renderHist(lista) {
 }
 
 // ═══════════════════════════════════════════════════════
+//  LISTA DE COMPRAS — compartilhada e sincronizada
+// ═══════════════════════════════════════════════════════
+function carregarLista() {
+  const mes = document.getElementById('mes-lista').value;
+  if (!mes) return;
+
+  if (listaPrimeiraCarga) {
+    document.getElementById('lista-body').innerHTML = '<div class="empty">Carregando...</div>';
+  }
+
+  const url = APPS_SCRIPT_URL + '?acao=lista_get&mes=' + encodeURIComponent(mes);
+
+  fetch(url)
+    .then(r => r.json())
+    .then(function(data) {
+      listaPrimeiraCarga = false;
+      if (data.status === 'ok') {
+        renderLista(data.itens || []);
+      } else {
+        document.getElementById('lista-body').innerHTML = '<div class="empty">' + (data.mensagem || 'Erro ao carregar') + '</div>';
+      }
+    })
+    .catch(function() {
+      // Em atualizações automáticas de fundo, falha silenciosa —
+      // só mostra erro se ainda estava na tela de carregamento inicial
+      const body = document.getElementById('lista-body');
+      if (body.innerHTML.indexOf('Carregando') !== -1) {
+        body.innerHTML = '<div class="empty">Erro de conexão</div>';
+      }
+    });
+}
+
+function renderLista(itens) {
+  const body = document.getElementById('lista-body');
+  if (!itens.length) {
+    body.innerHTML = '<div class="empty">Lista vazia — adicione o primeiro item 🛒</div>';
+    return;
+  }
+  body.innerHTML = itens.map(function(it) {
+    return `<div class="lista-item" data-linha="${it.linha}">
+      <button class="lista-check" onclick="marcarComprado(${it.linha}, this)" aria-label="Marcar como comprado"></button>
+      <span class="lista-texto">${escapeHtml(it.texto)}</span>
+    </div>`;
+  }).join('');
+}
+
+function marcarComprado(linha, btnEl) {
+  const mes = document.getElementById('mes-lista').value;
+  const row = btnEl.closest('.lista-item');
+  const texto = row.querySelector('.lista-texto').textContent;
+
+  row.classList.add('comprado');
+  btnEl.disabled = true;
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ acao: 'lista_remove', mes: mes, linha: linha, texto: texto })
+  })
+  .then(function() {
+    setTimeout(function() {
+      row.remove();
+      if (!document.querySelectorAll('#lista-body .lista-item').length) {
+        document.getElementById('lista-body').innerHTML = '<div class="empty">Lista vazia — adicione o primeiro item 🛒</div>';
+      }
+    }, 250);
+  })
+  .catch(function() {
+    row.classList.remove('comprado');
+    btnEl.disabled = false;
+    toast('Erro ao remover item', 'err');
+  });
+}
+
+function adicionarItemLista() {
+  const mes   = document.getElementById('mes-lista').value;
+  const input = document.getElementById('novo-item-lista');
+  const item  = input.value.trim();
+  const btn   = document.getElementById('btn-add-lista');
+
+  if (!item) {
+    input.classList.add('err-field');
+    setTimeout(() => input.classList.remove('err-field'), 600);
+    return;
+  }
+
+  input.value = '';
+  btn.disabled = true;
+
+  // Otimista: mostra o item na hora, antes mesmo da resposta do servidor
+  const body = document.getElementById('lista-body');
+  if (body.querySelector('.empty')) body.innerHTML = '';
+  const divTemp = document.createElement('div');
+  divTemp.className = 'lista-item';
+  divTemp.innerHTML = `<button class="lista-check" disabled></button><span class="lista-texto">${escapeHtml(item)}</span>`;
+  body.appendChild(divTemp);
+
+  fetch(APPS_SCRIPT_URL, {
+    method: 'POST',
+    mode: 'no-cors',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ acao: 'lista_add', mes: mes, item: item })
+  })
+  .then(function() {
+    btn.disabled = false;
+    listaPrimeiraCarga = false;
+    carregarLista(); // ressincroniza com a linha real da planilha
+  })
+  .catch(function() {
+    btn.disabled = false;
+    divTemp.remove();
+    toast('Erro ao adicionar item', 'err');
+  });
+}
+
+// ═══════════════════════════════════════════════════════
 //  UTILITÁRIOS
 // ═══════════════════════════════════════════════════════
 function capitalizarPessoa(p) {
@@ -925,6 +1123,11 @@ function detectarDispositivo() {
   if (/iPhone|iPad|iPod/i.test(ua)) return standalone ? 'iOS (App)' : 'iOS (Safari)';
   if (/Android/i.test(ua)) return isAndroidApp ? 'Android (App)' : 'Android (Navegador)';
   return 'Web Desktop';
+}
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
 }
 function toast(msg, tipo = 'ok') {
   const t = document.getElementById('toast');
